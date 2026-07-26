@@ -15,6 +15,12 @@
 #     # SPHERE:
 #     center: { x: 0, y: 0, z: 0 }
 #     radius: 1.5
+#     # 传送点（可选，所有字段均可省略；推荐用 /parkour edit <zone> spawn 设置）：
+#     #   LOBBY  → 大厅传送坐标+朝向
+#     #   LEVEL  → 该关起点传送的朝向（坐标取自所属 START 区域）
+#     #   START  → 起点传送坐标（缺省取 START 中心）
+#     # 未指定字段：坐标=区域中心+该列最高非空气方块上一格；朝向=0/0
+#     spawn: { x: 0.5, y: 64.0, z: 0.5, yaw: 90.0, pitch: 0.0 }
 # next-zone-id: 2
 
 zones: []

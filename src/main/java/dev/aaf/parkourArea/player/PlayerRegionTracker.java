@@ -15,8 +15,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 每 2tick（detect-interval-ticks）在 global region 线程上扫描所有在线玩家，
- * 检测其最具体区域是否变化，发布 {@link PlayerZoneChangeEvent}，并更新防挂机位置快照。
+ * 每 tick（detect-interval-ticks，默认 1）在 global region 线程上扫描所有在线玩家，
+ * 检测其最具体区域是否变化，发布 {@link PlayerZoneChangeEvent}，并更新防挂机位置快照、
+ * 发布跑酷 tick 事件（驱动起点/终点/存档点/防挂机/计时器刷新）。
  */
 public final class PlayerRegionTracker {
 

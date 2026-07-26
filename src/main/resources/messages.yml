@@ -1,5 +1,7 @@
 # ParkourArea 文案配置
 # 颜色码兼容 legacy (&a &b ...) 与 MiniMessage (<green> <aqua> ...)
+# 注意：同一条文本内含 & 码时按 legacy 解析（此时 <...> 原样输出）；
+#       想用 MiniMessage 请写纯标签、不要混 & 码
 # 变量用 {xxx} 占位
 
 prefix: "&8[&bParkour&8] &r"
@@ -36,14 +38,15 @@ command:
   reloaded: "&a配置已重载。"
   confirm-required: "&e请再次执行以确认: &f/{command}"
   cancelled: "&7操作已取消。"
-  sound-toggle: "&a存档点音效已{state}。"
   sound-master-on: "&a所有跑酷音效 &f已开启"
   sound-master-off: "&7所有跑酷音效 &f已关闭"
   sound-checkpoint-on: "&a存档点音效 &f已开启"
   sound-checkpoint-off: "&7存档点音效 &f已关闭"
   sound-block-on: "&a效果块音效 &f已开启"
   sound-block-off: "&7效果块音效 &f已关闭"
-  sound-usage: "&c用法: /parkour sound <checkpoint|block> <on|off>"
+  togglesound-usage: "&c用法: /parkour togglesound [all|checkpoint|block] [on|off]"
+  spawn-set: "&a已设置区域 &e#{id} &a的传送点。"
+  spawn-cleared: "&7已清除区域 &e#{id} &7的传送点。"
 
 info:
   header: "&b===== &f区域信息 &b====="
@@ -70,15 +73,28 @@ actionbar:
 menu:
   main-title: "&bParkour 菜单"
   level-select-title: "&a选择关卡"
-  leaderboard-title: "&e{level} 排行榜"
+  leaderboard-title: "&e用时排行榜"
   confirm-title: "&c确认删除?"
   level-grey-name: "&7{index}. {name}"
   level-yellow-name: "&e{index}. {name}"
   level-green-name: "&a{index}. {name}"
   lore-best: "&7最佳: &a{best}"
+  lore-no-best: "&7暂无"
   lore-status-grey: "&7未解锁"
   lore-status-yellow: "&e可挑战"
   lore-status-green: "&a已通关"
+  lb-prev: "&a◀ 上一关"
+  lb-next: "&a下一关 ▶"
+  lb-to-global: "&b▶ 全服记录"
+  lb-to-self: "&b◀ 我的记录"
+  lb-level-indicator: "&b{index}. {name}"
+  lb-my-best: "&e我的最佳"
+  lb-recent-header: "&7最近挑战"
+  lb-global-header: "&7全服前 20"
+  lb-rank: "&f{rank} - &a{time} &7{player}"
+  lb-self-rank: "&f{n} - &a{time}"
+  lb-no-record: "&7暂无"
+  lb-back: "&7返回主菜单"
 
 parkour:
   marked: "&a你已进入跑酷区域。"

@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * <ul>
  *   <li>NONE（未到起点、未解锁）：灰色混凝土，不可选</li>
- *   <li>VISITED 或 nextExpected：黄色混凝土，可选</li>
+ *   <li>VISITED 或 nextExpected：黄色混凝土，可选，显示最佳用时（无则"暂无"）</li>
  *   <li>COMPLETED：绿色混凝土，可选，显示最佳用时</li>
  * </ul>
  * 玩家只能点击非灰色混凝土的关卡。
@@ -79,10 +79,12 @@ public final class LevelSelectMenu extends ParkourMenu {
             vars.put("name", levelName);
             List<String> lore = new ArrayList<>();
             lore.add(plugin.messages().raw(loreKey, vars));
-            if (status == ProgressStatus.COMPLETED) {
+            if (selectable) {
                 Long best = plugin.timerService().getBest(viewer.getUniqueId(), levelId);
-                lore.add(plugin.messages().raw("menu.lore-best", Map.of(
-                        "best", best == null ? "--" : ActionBarService.formatDuration(best))));
+                lore.add(best == null
+                        ? plugin.messages().raw("menu.lore-no-best")
+                        : plugin.messages().raw("menu.lore-best", Map.of(
+                                "best", ActionBarService.formatDuration(best))));
             }
             inventory.setItem(slot, icon(material, plugin.messages().raw(nameKey, vars),
                     lore.toArray(new String[0])));
@@ -121,7 +123,14 @@ public final class LevelSelectMenu extends ParkourMenu {
         session.selectedLevel(level);
         session.phase(PlayerPhase.LEVEL_SELECTED);
         session.clearCheckpoint();
-        plugin.scheduler().runEntity(viewer, p -> p.teleport(startLocation(start)), () -> {});
+        plugin.scheduler().runEntity(viewer, p -> {
+            org.bukkit.World world = start.worldUid() != null
+                    ? org.bukkit.Bukkit.getWorld(start.worldUid()) : p.getWorld();
+            if (world != null) {
+                // 坐标取自 START（spawn 或中心 + 最高非空气方块），朝向取自所属 LEVEL 的 spawn（缺省 0/0）
+                p.teleport(dev.aaf.parkourArea.util.Locations.teleportLocation(world, start, level));
+            }
+        }, () -> {});
     }
 
     private Zone findStart(Zone level) {
@@ -131,14 +140,5 @@ public final class LevelSelectMenu extends ParkourMenu {
             }
         }
         return null;
-    }
-
-    private Location startLocation(Zone start) {
-        if (start.shape() == SelectionShape.CUBOID) {
-            double cx = (start.minX() + start.maxX()) / 2.0 + 0.5;
-            double cz = (start.minZ() + start.maxZ()) / 2.0 + 0.5;
-            return new Location(viewer.getWorld(), cx, start.maxY() + 1, cz);
-        }
-        return new Location(viewer.getWorld(), start.centerX(), start.centerY(), start.centerZ());
     }
 }

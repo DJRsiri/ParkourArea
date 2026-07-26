@@ -26,6 +26,8 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("org.assertj:assertj-core:3.26.3")
+    // 单测用到 adventure 序列化器（ColorUtil 等）；compileOnly 不传导到测试类路径
+    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     // Gradle 9 需显式声明 JUnit Platform launcher 才能运行测试
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -52,6 +54,11 @@ tasks {
     }
 
     // shadow 时把运行时依赖打进 jar；compileOnly 依赖（paper-api/WE/PAPI）由服务端提供
+    jar {
+        // 瘦 jar 与 shadowJar（classifier 为空）输出路径会撞名，须区分，否则执行顺序靠后的会覆盖胖 jar
+        archiveClassifier.set("thin")
+    }
+
     shadowJar {
         archiveClassifier.set("")
         mergeServiceFiles()

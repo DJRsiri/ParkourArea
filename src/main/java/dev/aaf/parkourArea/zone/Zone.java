@@ -21,10 +21,12 @@ public final class Zone {
     private final int minX, minY, minZ, maxX, maxY, maxZ;
     // SPHERE
     private final double centerX, centerY, centerZ, radius;
+    // 传送点（可空，部分字段可空；非 final，可通过 edit 命令/zones.yml 修改）
+    private ZoneSpawn spawn;
 
     private Zone(int id, String name, ZoneType type, SelectionShape shape, UUID worldUid,
                  Integer parentId, int minX, int minY, int minZ, int maxX, int maxY, int maxZ,
-                 double centerX, double centerY, double centerZ, double radius) {
+                 double centerX, double centerY, double centerZ, double radius, ZoneSpawn spawn) {
         this.id = id;
         this.name = name == null ? "" : name;
         this.type = type;
@@ -35,20 +37,31 @@ public final class Zone {
         this.maxX = maxX; this.maxY = maxY; this.maxZ = maxZ;
         this.centerX = centerX; this.centerY = centerY; this.centerZ = centerZ;
         this.radius = radius;
+        this.spawn = spawn == null || spawn.isEmpty() ? null : spawn;
     }
 
     public static Zone cuboid(int id, String name, ZoneType type, UUID worldUid, Integer parentId,
                               int x1, int y1, int z1, int x2, int y2, int z2) {
+        return cuboid(id, name, type, worldUid, parentId, x1, y1, z1, x2, y2, z2, null);
+    }
+
+    public static Zone cuboid(int id, String name, ZoneType type, UUID worldUid, Integer parentId,
+                              int x1, int y1, int z1, int x2, int y2, int z2, ZoneSpawn spawn) {
         return new Zone(id, name, type, SelectionShape.CUBOID, worldUid, parentId,
                 Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2),
                 Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2),
-                0, 0, 0, 0);
+                0, 0, 0, 0, spawn);
     }
 
     public static Zone sphere(int id, String name, ZoneType type, UUID worldUid, Integer parentId,
                               double cx, double cy, double cz, double radius) {
+        return sphere(id, name, type, worldUid, parentId, cx, cy, cz, radius, null);
+    }
+
+    public static Zone sphere(int id, String name, ZoneType type, UUID worldUid, Integer parentId,
+                              double cx, double cy, double cz, double radius, ZoneSpawn spawn) {
         return new Zone(id, name, type, SelectionShape.SPHERE, worldUid, parentId,
-                0, 0, 0, 0, 0, 0, cx, cy, cz, radius);
+                0, 0, 0, 0, 0, 0, cx, cy, cz, radius, spawn);
     }
 
     public int id() {
@@ -117,6 +130,14 @@ public final class Zone {
 
     public double radius() {
         return radius;
+    }
+
+    public ZoneSpawn spawn() {
+        return spawn;
+    }
+
+    public void setSpawn(ZoneSpawn spawn) {
+        this.spawn = spawn == null || spawn.isEmpty() ? null : spawn;
     }
 
     /**

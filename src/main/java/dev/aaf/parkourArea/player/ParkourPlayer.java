@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * 跑酷玩家会话（不是 Bukkit Player）。
  *
- * <p>仅在 global region 线程修改字段（由每 2tick 检测任务与会话协调器驱动）。</p>
+ * <p>仅在 global region 线程修改字段（由每 tick 检测任务与会话协调器驱动）。</p>
  */
 public final class ParkourPlayer {
 

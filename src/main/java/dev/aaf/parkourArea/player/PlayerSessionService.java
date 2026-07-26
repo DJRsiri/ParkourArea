@@ -7,11 +7,12 @@ import dev.aaf.parkourArea.event.ParkourUnmarkedEvent;
 import dev.aaf.parkourArea.event.PlayerZoneChangeEvent;
 import dev.aaf.parkourArea.hotbar.HotbarService;
 import dev.aaf.parkourArea.persistence.Preference;
+import dev.aaf.parkourArea.util.Locations;
 import dev.aaf.parkourArea.zone.Zone;
 import dev.aaf.parkourArea.zone.ZoneRepository;
 import dev.aaf.parkourArea.zone.ZoneType;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -212,13 +213,14 @@ public final class PlayerSessionService {
         session.selectedLevel(null);
         session.clearCheckpoint();
         Zone lobby = findLobbyAround(player);
-        UUID uid = player.getUniqueId();
         plugin.scheduler().runEntity(player, p -> {
-            if (lobby != null && lobby.shape() == dev.aaf.parkourArea.zone.SelectionShape.CUBOID) {
-                double cx = (lobby.minX() + lobby.maxX()) / 2.0 + 0.5;
-                double cz = (lobby.minZ() + lobby.maxZ()) / 2.0 + 0.5;
-                double cy = lobby.maxY() + 1;
-                p.teleport(new Location(p.getWorld(), cx, cy, cz));
+            if (lobby != null) {
+                World world = lobby.worldUid() != null
+                        ? Bukkit.getWorld(lobby.worldUid()) : p.getWorld();
+                if (world != null) {
+                    // 坐标+朝向均来自 LOBBY 的 spawn 配置（缺省：中心 + 最高非空气方块上一格 + 0/0）
+                    p.teleport(Locations.teleportLocation(world, lobby, lobby));
+                }
             }
             plugin.messages().send(p, "parkour.teleported-lobby");
         }, () -> {});

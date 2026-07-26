@@ -83,4 +83,46 @@ public final class PlayerTimeDao {
         }
         return out;
     }
+
+    /** 该玩家该关最近 limit 次挑战用时，最新在前（排行榜"仅自己"视图用）。 */
+    public List<Long> getRecentTimes(UUID uuid, int levelId, int limit) throws SQLException {
+        List<Long> out = new ArrayList<>();
+        try (Connection c = db.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                     "SELECT duration_millis FROM player_level_time WHERE player_uuid=? AND level_zone_id=? "
+                             + "ORDER BY finished_at DESC LIMIT ?")) {
+            ps.setBytes(1, Database.uuidToBytes(uuid));
+            ps.setInt(2, levelId);
+            ps.setInt(3, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(rs.getLong(1));
+                }
+            }
+        }
+        return out;
+    }
+
+    /** 该关全玩家前 limit 条最快记录（同一玩家可多次上榜），按用时升序（排行榜"所有玩家"视图用）。 */
+    public List<TimeEntry> getTopTimesForLevel(int levelId, int limit) throws SQLException {
+        List<TimeEntry> out = new ArrayList<>();
+        try (Connection c = db.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                     "SELECT player_uuid, duration_millis FROM player_level_time WHERE level_zone_id=? "
+                             + "ORDER BY duration_millis ASC LIMIT ?")) {
+            ps.setInt(1, levelId);
+            ps.setInt(2, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    byte[] bytes = rs.getBytes(1);
+                    UUID player = bytes != null ? Database.bytesToUuid(bytes) : null;
+                    out.add(new TimeEntry(player, rs.getLong(2)));
+                }
+            }
+        }
+        return out;
+    }
+
+    /** 排行榜条目：玩家 + 用时。 */
+    public record TimeEntry(UUID player, long duration) {}
 }

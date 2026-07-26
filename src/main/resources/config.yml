@@ -2,10 +2,11 @@
 # 重载命令: /parkour reload
 
 settings:
-  # 区域/方块/存档点检测周期（单位 tick，20tick=1秒）。需求要求每 2 tick = 10。
-  detect-interval-ticks: 10
-  # actionbar 渲染周期（tick）
-  actionbar-interval-ticks: 5
+  # 区域/方块/存档点检测周期（单位 tick，20tick=1秒）。默认 1 = 每 tick 检测刷新（起点/终点/计时器等）。
+  # 玩家极多时为降低 global region 单线程开销可调大（如 2）。
+  detect-interval-ticks: 1
+  # actionbar 渲染周期（tick）。默认 1 = 每 tick 刷新计时器显示。
+  actionbar-interval-ticks: 1
   # 防挂机：同一位置无移动或视角晃动超过该秒数则作废成绩并传回大厅
   anti-idle-seconds: 60
   # 防挂机：视角变化低于该角度（度）视为未晃动

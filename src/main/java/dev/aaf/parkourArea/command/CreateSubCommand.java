@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * /parkour create &lt;type&gt; &lt;name|"-"&gt; &lt;parent|"-"|"here"&gt; [shape] &lt;coords...&gt;
+ * /parkour create &lt;type&gt; &lt;name|"-"&gt; [parent|"-"|"here"|#id] [shape] &lt;coords...&gt;
  *
- * <p>固定格式：type 后紧跟 name（"-" 表示空）与 parent（GLOBAL 用 "-"，"here" 自动推断）。
- * shape 默认 cuboid；sphere 仅 start/end 可用。
+ * <p>type 后紧跟 name（"-" 表示空）。parent 可省略，默认按 "here" 依玩家站位自动推断；
+ * GLOBAL 用 "-" 或省略。shape 默认 cuboid；sphere 仅 start/end 可用。
  * 坐标缺失时若安装了 WorldEdit 则用其 cuboid 选区。</p>
  */
 public final class CreateSubCommand implements SubCommand {
@@ -42,12 +42,12 @@ public final class CreateSubCommand implements SubCommand {
 
     @Override
     public String description() {
-        return "创建区域";
+        return "创建区域（parent 留空默认 here）";
     }
 
     @Override
     public String usage() {
-        return "<type> <name|-> <parent|-|here> [cuboid|sphere] <coords...>";
+        return "<type> <name|-> [parent|-|here] [cuboid|sphere] <coords...>";
     }
 
     @Override
@@ -60,7 +60,7 @@ public final class CreateSubCommand implements SubCommand {
             plugin.messages().send(sender, "command.edit-mode-required");
             return;
         }
-        if (args.length < 3) {
+        if (args.length < 2) {
             plugin.messages().send(sender, "command.invalid-hierarchy",
                     Map.of("reason", "参数不足。用法: " + usage()));
             return;
@@ -74,26 +74,86 @@ public final class CreateSubCommand implements SubCommand {
         }
 
         String name = "-".equals(args[1]) ? "" : args[1];
-        String parentArg = args[2];
 
-        int idx = 3;
+        // 从 args[2] 起扫描：shape 关键字 / parent（-、here、#id、区域名）各消费一次，
+        // 剩下的视为坐标（纯数字开头）。parent 留空默认 here 推断。
         SelectionShape shape = SelectionShape.CUBOID;
-        if (args.length > idx) {
-            SelectionShape s = SelectionShape.parse(args[idx]);
-            if (s != null) {
-                shape = s;
-                idx++;
-                if (shape == SelectionShape.SPHERE && type != ZoneType.START && type != ZoneType.END) {
-                    plugin.messages().send(sender, "command.invalid-shape");
-                    return;
+        boolean shapeSet = false;
+        Integer parentId = null;
+        boolean parentHere = false;
+        boolean parentSet = false;
+        int idx = 2;
+        while (idx < args.length) {
+            String tok = args[idx];
+            if (!shapeSet) {
+                SelectionShape s = SelectionShape.parse(tok);
+                if (s != null) {
+                    shape = s;
+                    shapeSet = true;
+                    idx++;
+                    continue;
                 }
             }
+            if (!parentSet) {
+                if ("-".equals(tok)) {
+                    parentSet = true;
+                    idx++;
+                    continue;
+                }
+                if ("here".equalsIgnoreCase(tok)) {
+                    parentHere = true;
+                    parentSet = true;
+                    idx++;
+                    continue;
+                }
+                if (tok.startsWith("#")) {
+                    Zone z = parseId(tok.substring(1));
+                    if (z == null) {
+                        plugin.messages().send(sender, "command.not-found", Map.of("query", tok));
+                        return;
+                    }
+                    parentId = z.id();
+                    parentSet = true;
+                    idx++;
+                    continue;
+                }
+                if (!isNumeric(tok)) {
+                    Zone z = plugin.zoneRepository().tree().resolve(tok);
+                    if (z == null) {
+                        plugin.messages().send(sender, "command.not-found", Map.of("query", tok));
+                        return;
+                    }
+                    parentId = z.id();
+                    parentSet = true;
+                    idx++;
+                    continue;
+                }
+            }
+            break; // 数字开头 → 坐标段
+        }
+
+        if (shape == SelectionShape.SPHERE && type != ZoneType.START && type != ZoneType.END) {
+            plugin.messages().send(sender, "command.invalid-shape");
+            return;
         }
 
         UUIDHolder world = new UUIDHolder();
         ZoneSpec spec;
+        int remaining = args.length - idx;
         if (shape == SelectionShape.CUBOID) {
-            int[] c = tryParseInts(args, idx, 6);
+            int[] c = null;
+            if (remaining == 6) {
+                c = tryParseInts(args, idx, 6);
+                if (c == null) {
+                    plugin.messages().send(sender, "command.invalid-hierarchy",
+                            Map.of("reason", "坐标参数错误，cuboid 需要 6 个整数: <x1> <y1> <z1> <x2> <y2> <z2>"));
+                    return;
+                }
+            } else if (remaining != 0) {
+                plugin.messages().send(sender, "command.invalid-hierarchy",
+                        Map.of("reason", "坐标参数数量错误，cuboid 需要 6 个整数（或留空用 WorldEdit 选区）"));
+                return;
+            }
             if (c == null) {
                 SelectionInfo sel = plugin.worldEditHook().getCuboidSelection(player);
                 if (sel == null) {
@@ -106,7 +166,7 @@ public final class CreateSubCommand implements SubCommand {
             spec = ZoneSpec.cuboid(type, name, null, null,
                     c[0], c[1], c[2], c[3], c[4], c[5]);
         } else {
-            double[] c = tryParseDoubles(args, idx, 4);
+            double[] c = remaining == 4 ? tryParseDoubles(args, idx, 4) : null;
             if (c == null) {
                 plugin.messages().send(sender, "command.invalid-hierarchy",
                         Map.of("reason", "sphere 需要中心坐标与半径: <cx> <cy> <cz> <radius>"));
@@ -115,8 +175,10 @@ public final class CreateSubCommand implements SubCommand {
             spec = ZoneSpec.sphere(type, name, null, null, c[0], c[1], c[2], c[3]);
         }
 
-        // 解析 parent
-        Integer parentId = resolveParent(player, type, parentArg);
+        // 解析 parent：显式 > 默认 here 推断
+        if (parentHere || !parentSet) {
+            parentId = inferParent(player, type);
+        }
         if (type == ZoneType.GLOBAL) {
             if (parentId != null) {
                 plugin.messages().send(sender, "command.invalid-hierarchy",
@@ -125,7 +187,7 @@ public final class CreateSubCommand implements SubCommand {
             }
         } else if (parentId == null) {
             plugin.messages().send(sender, "command.invalid-hierarchy",
-                    Map.of("reason", "需要指定父区域（用 id/名称/'here'）"));
+                    Map.of("reason", "未能推断父区域（请站在目标父区域内，或用 名称/#id/'here' 显式指定）"));
             return;
         }
 
@@ -143,15 +205,23 @@ public final class CreateSubCommand implements SubCommand {
         }
     }
 
-    private Integer resolveParent(Player player, ZoneType type, String arg) {
-        if ("-".equals(arg)) {
+    /** #id 显式父区域引用（避免纯数字 id 与坐标混淆）。 */
+    private Zone parseId(String digits) {
+        try {
+            return plugin.zoneRepository().tree().getById(Integer.parseInt(digits));
+        } catch (NumberFormatException e) {
             return null;
         }
-        if ("here".equalsIgnoreCase(arg)) {
-            return inferParent(player, type);
+    }
+
+    /** 纯数字 token 视为坐标起点（整数或小数，可负）。 */
+    private static boolean isNumeric(String tok) {
+        try {
+            Double.parseDouble(tok);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
-        Zone z = plugin.zoneRepository().tree().resolve(arg);
-        return z == null ? null : z.id();
     }
 
     private Integer inferParent(Player player, ZoneType type) {
@@ -209,6 +279,9 @@ public final class CreateSubCommand implements SubCommand {
     public List<String> tabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
             return filter(List.of("global", "lobby", "level", "start", "end"), args[0]);
+        }
+        if (args.length == 3) {
+            return filter(List.of("here", "-", "cuboid", "sphere"), args[2]);
         }
         if (args.length == 4) {
             return filter(List.of("cuboid", "sphere"), args[3]);

@@ -78,14 +78,29 @@ public final class ZoneRepository {
         }
         UUID world = parseUuid(m.get("world"));
         Integer parent = parseParent(m.get("parent"));
+        ZoneSpawn spawn = parseSpawn(m.get("spawn"));
         if (shape == SelectionShape.CUBOID) {
             int[] p1 = coords(m.get("pos1"));
             int[] p2 = coords(m.get("pos2"));
-            return Zone.cuboid(id, name, type, world, parent, p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+            return Zone.cuboid(id, name, type, world, parent, p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], spawn);
         }
         double[] c = coordsD(m.get("center"));
         double r = toDouble(m.get("radius"), 1.0);
-        return Zone.sphere(id, name, type, world, parent, c[0], c[1], c[2], r);
+        return Zone.sphere(id, name, type, world, parent, c[0], c[1], c[2], r, spawn);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ZoneSpawn parseSpawn(Object o) {
+        if (!(o instanceof Map)) {
+            return null;
+        }
+        Map<String, Object> m = (Map<String, Object>) o;
+        return ZoneSpawn.of(
+                toDoubleNullable(m.get("x")),
+                toDoubleNullable(m.get("y")),
+                toDoubleNullable(m.get("z")),
+                toDoubleNullable(m.get("yaw")),
+                toDoubleNullable(m.get("pitch")));
     }
 
     @SuppressWarnings("unchecked")
@@ -187,6 +202,17 @@ public final class ZoneRepository {
         return true;
     }
 
+    /** 设置区域传送点（spawn 字段不参与索引，直接改对象即可）。 */
+    public boolean setSpawn(int id, ZoneSpawn spawn) {
+        Zone z = tree.getById(id);
+        if (z == null) {
+            return false;
+        }
+        z.setSpawn(spawn);
+        saveAsync();
+        return true;
+    }
+
     private void saveAsync() {
         scheduler.runAsync(this::saveNow);
     }
@@ -208,6 +234,9 @@ public final class ZoneRepository {
             } else {
                 m.put("center", coordsMapD(z.centerX(), z.centerY(), z.centerZ()));
                 m.put("radius", z.radius());
+            }
+            if (z.spawn() != null) {
+                m.put("spawn", spawnMap(z.spawn()));
             }
             zoneList.add(m);
         }
@@ -243,6 +272,31 @@ public final class ZoneRepository {
         m.put("y", y);
         m.put("z", z);
         return m;
+    }
+
+    /** 仅写 spawn 中非 null 的字段（部分指定）。 */
+    private Map<String, Object> spawnMap(ZoneSpawn s) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        if (s.x() != null) m.put("x", s.x());
+        if (s.y() != null) m.put("y", s.y());
+        if (s.z() != null) m.put("z", s.z());
+        if (s.yaw() != null) m.put("yaw", s.yaw());
+        if (s.pitch() != null) m.put("pitch", s.pitch());
+        return m;
+    }
+
+    private static Double toDoubleNullable(Object o) {
+        if (o == null) {
+            return null;
+        }
+        if (o instanceof Number) {
+            return ((Number) o).doubleValue();
+        }
+        try {
+            return Double.parseDouble(String.valueOf(o));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static int toInt(Object o, int def) {

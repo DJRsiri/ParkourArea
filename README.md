@@ -34,12 +34,13 @@
 | `/parkour` | 显示帮助 |
 | `/parkour gui` | 打开主菜单 |
 | `/parkour editmode [true\|false]` | *切换编辑模式 |
-| `/parkour create <type> <name\|-> <parent\|-\|here> [cuboid\|sphere] <coords...>` | *创建区域 |
+| `/parkour create <type> <name\|-> [parent\|-\|here] [cuboid\|sphere] <coords...>` | *创建区域 |
 | `/parkour delete <zoneid/zonename>` | *删除区域（二次确认，级联删除子区域） |
 | `/parkour edit <zoneid/zonename> rename <newname>` | *编辑区域 |
 | `/parkour info [zoneid/zonename \| pos <x> <y> <z>]` | 显示单个区域信息 |
 | `/parkour info-all [zoneid/zonename \| pos <x> <y> <z>]` | 显示当前位置所有关系区域 |
 | `/parkour list` | 列出所有区域 |
+| `/parkour togglesound [all\|checkpoint\|block] [on\|off]` | 切换跑酷音效（选项留空默认 all，on/off 留空为切换） |
 | `/parkour resetsave <levelzone>` | 删除玩家在某关的存档（二次确认） |
 | `/parkour reload` | *重载全部配置 |
 
@@ -47,7 +48,7 @@
 
 - `<type>`：`global` / `lobby` / `level` / `start` / `end`
 - `<name|->`：区域名称，`-` 表示留空
-- `<parent|-|here>`：父区域 id 或名称；`-` 表示无父级（仅 GLOBAL）；`here` 自动从当前位置推断
+- `[parent|-|here]`：父区域名称或 `#id`；`-` 表示无父级（仅 GLOBAL）；`here` 从当前位置推断；**留空默认 here**
 - `[cuboid|sphere]`：选区模式（sphere 仅 start/end 可用），默认 cuboid
 - `<coords>`：cuboid 为 `<x1> <y1> <z1> <x2> <y2> <z2>`；sphere 为 `<cx> <cy> <cz> <radius>`。安装了 WorldEdit 且 cuboid 时可省略坐标，改用当前选区。
 
@@ -55,9 +56,9 @@
 ```
 /parkour editmode true
 /parkour create global myparkour - cuboid -1000 -64 -1000 1000 320 1000
-/parkour create lobby 大厅 1 here cuboid 10 100 10 50 150 50
-/parkour create level level1 2 here cuboid 0 100 0 30 130 30
-/parkour create start start1 3 here sphere 15 120 15 1.5
+/parkour create lobby 大厅          # 站在全局区域内，parent 留空自动推断，用 WE 选区
+/parkour create level level1 cuboid 0 100 0 30 130 30
+/parkour create start start1 #4 sphere 15 120 15 1.5
 ```
 
 ## 区域层级规则

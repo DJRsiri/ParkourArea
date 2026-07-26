@@ -68,13 +68,21 @@ public final class MenuListener implements Listener {
         if (session == null || session.selectedLevel() == null) {
             return;
         }
-        Zone start = findStart(session.selectedLevel());
+        Zone level = session.selectedLevel();
+        Zone start = findStart(level);
         if (start == null) {
             return;
         }
         session.phase(PlayerPhase.AT_START);
         session.clearCheckpoint();
-        plugin.scheduler().runEntity(player, p -> p.teleport(startLocation(player, start)), () -> {});
+        plugin.scheduler().runEntity(player, p -> {
+            org.bukkit.World world = start.worldUid() != null
+                    ? org.bukkit.Bukkit.getWorld(start.worldUid()) : p.getWorld();
+            if (world != null) {
+                // 坐标取自 START（spawn 或中心 + 最高非空气方块），朝向取自所属 LEVEL 的 spawn（缺省 0/0）
+                p.teleport(dev.aaf.parkourArea.util.Locations.teleportLocation(world, start, level));
+            }
+        }, () -> {});
         plugin.messages().send(player, "parkour.teleported-start");
     }
 
@@ -101,14 +109,5 @@ public final class MenuListener implements Listener {
             }
         }
         return null;
-    }
-
-    private Location startLocation(Player player, Zone start) {
-        if (start.shape() == SelectionShape.CUBOID) {
-            double cx = (start.minX() + start.maxX()) / 2.0 + 0.5;
-            double cz = (start.minZ() + start.maxZ()) / 2.0 + 0.5;
-            return new Location(player.getWorld(), cx, start.maxY() + 1, cz);
-        }
-        return new Location(player.getWorld(), start.centerX(), start.centerY(), start.centerZ());
     }
 }

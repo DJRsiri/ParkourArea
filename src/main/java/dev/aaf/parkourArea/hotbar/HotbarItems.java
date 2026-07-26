@@ -32,7 +32,7 @@ public final class HotbarItems {
     }
 
     public ItemStack checkpoint() {
-        return tool(Material.COMPASS, "&a回到存档点", ACTION_CHECKPOINT);
+        return tool(Material.RECOVERY_COMPASS, "&a回到存档点", ACTION_CHECKPOINT);
     }
 
     public ItemStack menu() {

@@ -40,36 +40,52 @@ public final class ZoneContainment {
         return true;
     }
 
-    /** 两个区域是否几何相交（用于同级区域不可相交的校验）。 */
+    /**
+     * 两个区域是否几何相交（用于同级区域不可相交的校验）。
+     *
+     * <p>按精确形状判定，且仅贴面/共棱/相切（零体积重叠）<b>不算</b>相交，
+     * 允许同级区域紧贴设置。</p>
+     */
     public static boolean intersects(Zone a, Zone b) {
-        // AABB 相交快速排除
-        if (!aabbIntersects(a, b)) {
-            return false;
+        boolean aSphere = a.shape() == SelectionShape.SPHERE;
+        boolean bSphere = b.shape() == SelectionShape.SPHERE;
+        if (!aSphere && !bSphere) {
+            return cuboidIntersectsCuboid(a, b);
         }
-        // 简化：AABB 相交即视为可能相交（保守判定，宁可误拒也不放过）
-        // 对跑酷场景足够精确（区域通常是长方体/球体，重叠判定用 AABB 已覆盖大部分）
-        return true;
+        if (aSphere && bSphere) {
+            double dx = a.centerX() - b.centerX();
+            double dy = a.centerY() - b.centerY();
+            double dz = a.centerZ() - b.centerZ();
+            double r = a.radius() + b.radius();
+            return dx * dx + dy * dy + dz * dz < r * r;
+        }
+        Zone sphere = aSphere ? a : b;
+        Zone box = aSphere ? b : a;
+        return sphereIntersectsCuboid(sphere, box);
     }
 
-    private static boolean aabbIntersects(Zone a, Zone b) {
-        double[] aMin = aabbMin(a);
-        double[] aMax = aabbMax(a);
-        double[] bMin = aabbMin(b);
-        double[] bMax = aabbMax(b);
-        return aMin[0] <= bMax[0] && aMax[0] >= bMin[0]
-                && aMin[1] <= bMax[1] && aMax[1] >= bMin[1]
-                && aMin[2] <= bMax[2] && aMax[2] >= bMin[2];
+    /**
+     * cuboid 相交：把 [min,max] 方块区间视作连续体 [min, max+1)，用严格不等式判定。
+     * 贴面时 aMax+1 == bMin，重叠体积为零，不算相交。
+     */
+    private static boolean cuboidIntersectsCuboid(Zone a, Zone b) {
+        return a.minX() < b.maxX() + 1 && a.maxX() + 1 > b.minX()
+                && a.minY() < b.maxY() + 1 && a.maxY() + 1 > b.minY()
+                && a.minZ() < b.maxZ() + 1 && a.maxZ() + 1 > b.minZ();
     }
 
-    private static double[] aabbMin(Zone z) {
-        return z.shape() == SelectionShape.CUBOID
-                ? new double[]{z.minX(), z.minY(), z.minZ()}
-                : new double[]{z.centerX() - z.radius(), z.centerY() - z.radius(), z.centerZ() - z.radius()};
+    /** sphere 与 cuboid：圆心到 cuboid 连续体 [min, max+1) 的最近距离严格小于半径（相切不算）。 */
+    private static boolean sphereIntersectsCuboid(Zone sphere, Zone box) {
+        double cx = clamp(sphere.centerX(), box.minX(), box.maxX() + 1.0);
+        double cy = clamp(sphere.centerY(), box.minY(), box.maxY() + 1.0);
+        double cz = clamp(sphere.centerZ(), box.minZ(), box.maxZ() + 1.0);
+        double dx = sphere.centerX() - cx;
+        double dy = sphere.centerY() - cy;
+        double dz = sphere.centerZ() - cz;
+        return dx * dx + dy * dy + dz * dz < sphere.radius() * sphere.radius();
     }
 
-    private static double[] aabbMax(Zone z) {
-        return z.shape() == SelectionShape.CUBOID
-                ? new double[]{z.maxX() + 1, z.maxY() + 1, z.maxZ() + 1}
-                : new double[]{z.centerX() + z.radius(), z.centerY() + z.radius(), z.centerZ() + z.radius()};
+    private static double clamp(double v, double lo, double hi) {
+        return v < lo ? lo : Math.min(v, hi);
     }
 }

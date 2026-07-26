@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * actionbar 渲染服务。按 {@code actionbar-interval-ticks} 周期在 global region 线程渲染所有跑酷玩家。
+ * actionbar 渲染服务。每 tick（actionbar-interval-ticks，默认 1）在 global region 线程渲染所有跑酷玩家。
  *
  * <p>格式（游玩中）：当前用时 + 星级 / 最佳用时。
  * 踩在存档点方块上时持续显示存档点提示（替代计时）。</p>
