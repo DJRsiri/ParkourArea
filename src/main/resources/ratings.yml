@@ -1,0 +1,19 @@
+# 用时评级配置（降星）
+# 每个关卡一条，key 为关卡区域的数字 ID（与 /parkour list 显示的 id 一致）
+# 共 3 档：用时达到 tier1 内为三星，tier2 内为两星，tier3 内为一星，超过 tier3 则闪烁
+#
+# 星级显示（示例）:
+#   <= tier1: &a⭐⭐⭐
+#   <= tier2: &e⭐⭐&7⭐
+#   <= tier3: &c⭐&7⭐⭐
+#   >  tier3: 每 rating-flicker-interval-millis（默认 500ms）交替 &7⭐⭐⭐ / &8⭐⭐⭐
+#
+# 单位: 毫秒
+# 不配置某关则该关不显示评级星级（仅显示用时）
+
+ratings:
+  # 示例：id 为 3 的关卡
+  # 3:
+  #   tier1-millis: 30000
+  #   tier2-millis: 40000
+  #   tier3-millis: 50000

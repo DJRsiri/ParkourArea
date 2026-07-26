@@ -1,0 +1,38 @@
+# ParkourArea 全局配置
+# 重载命令: /parkour reload
+
+settings:
+  # 区域/方块/存档点检测周期（单位 tick，20tick=1秒）。需求要求每 2 tick = 10。
+  detect-interval-ticks: 10
+  # actionbar 渲染周期（tick）
+  actionbar-interval-ticks: 5
+  # 防挂机：同一位置无移动或视角晃动超过该秒数则作废成绩并传回大厅
+  anti-idle-seconds: 60
+  # 防挂机：视角变化低于该角度（度）视为未晃动
+  anti-idle-rotation-threshold-deg: 5.0
+  # 每关记录的前 N 次通关用时（循环覆盖最旧）
+  top-record-count: 10
+  # 标记跑酷玩家所需的允许游戏模式
+  require-gamemode:
+    - SURVIVAL
+    - ADVENTURE
+  # 中途存档点触发的方块（玩家脚下方块）
+  checkpoint-block: GOLD_BLOCK
+  # 记录存档点成功时播放的音效（仅播放一次）
+  checkpoint-success-sound: entity.player.levelup
+  # 是否启用存档点音效（可通过命令切换）
+  checkpoint-sound-enabled: true
+  # 所有跑酷音效总开关默认值（玩家可用工具切换；总开关关闭则所有跑酷音效静音）
+  sound-enabled: true
+  # 效果块（踩方块）音效默认值（玩家可用 /parkour sound block 切换）
+  block-sound-enabled: true
+  # 玩家在关卡区域对其他玩家的默认可见性挡位（FULL/HALF/TENTH/HIDDEN）
+  default-visibility-mode: FULL
+  # 评级 >tier3 时每多少毫秒交替闪烁一次
+  rating-flicker-interval-millis: 500
+
+# 默认编辑模式状态（启动时全局编辑模式开关）
+edit-mode-default: false
+
+# 调试日志（开发用，生产关闭）
+debug: false

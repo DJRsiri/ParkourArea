@@ -1,0 +1,21 @@
+# 区域定义配置
+# 通常通过 /parkour create 命令管理；也可手动编辑后 /parkour reload
+#
+# 结构:
+# zones:
+#   - id: 1
+#     name: world_parkour
+#     type: GLOBAL            # GLOBAL | LOBBY | LEVEL | START | END
+#     shape: CUBOID           # CUBOID | SPHERE (START/END 支持 SPHERE)
+#     world: <world-uuid>     # 世界 UUID
+#     parent: null            # 父区域 id
+#     # CUBOID:
+#     pos1: { x: 0, y: 0, z: 0 }
+#     pos2: { x: 0, y: 0, z: 0 }
+#     # SPHERE:
+#     center: { x: 0, y: 0, z: 0 }
+#     radius: 1.5
+# next-zone-id: 2
+
+zones: []
+next-zone-id: 1

@@ -1,0 +1,40 @@
+name: ParkourArea
+description: ${description}
+prefix: ParkourArea
+version: '${version}'
+
+main: dev.aaf.parkourArea.ParkourArea
+api-version: '1.21.11'
+load: POSTWORLD
+
+folia-supported: true
+
+authors: [ AethelArcticFox ]
+website: https://github.com/DJRsiri/
+
+softdepend: [ WorldEdit, FastAsyncWorldEdit, PlaceholderAPI, ProtocolLib ]
+
+commands:
+  parkour:
+    description: ParkourArea 主命令
+    aliases: [ pko, pk, po ]
+    usage: /parkour help
+    permission: parkour.user
+
+permissions:
+  parkour.*:
+    description: ParkourArea 全部权限
+    default: op
+    children:
+      parkour.admin: true
+      parkour.edit: true
+      parkour.user: true
+  parkour.admin:
+    description: 管理员权限（创建/删除/编辑区域等）
+    default: op
+  parkour.edit:
+    description: 编辑模式权限
+    default: op
+  parkour.user:
+    description: 普通玩家权限（游玩、打开菜单）
+    default: true

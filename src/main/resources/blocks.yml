@@ -1,0 +1,23 @@
+# 方块踩踏命令配置
+# 当玩家踩在指定方块（脚下方块，y-0.1 检测）上时执行
+# 支持变量: %player% 玩家名, 以及 PlaceholderAPI 变量 (需安装 PAPI)
+# command/sound 填 [] 表示禁用此项
+# repeat: true 时按 interval（tick）重复触发
+#
+# 方块名使用 Bukkit Material 名称（小写）
+
+blocks:
+  sea_lantern:
+    command:
+      - "damage %player% 1"
+    sound:
+      - "block.lava.pop"
+    repeat: true
+    interval: 10
+
+  # 示例：踩到岩浆块持续扣血 + 音效
+  # magma_block:
+  #   command: ["damage %player% 2"]
+  #   sound: ["block.fire.extinguish"]
+  #   repeat: true
+  #   interval: 20

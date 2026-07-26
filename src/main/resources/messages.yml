@@ -1,0 +1,94 @@
+# ParkourArea 文案配置
+# 颜色码兼容 legacy (&a &b ...) 与 MiniMessage (<green> <aqua> ...)
+# 变量用 {xxx} 占位
+
+prefix: "&8[&bParkour&8] &r"
+
+help:
+  header: "&b===== &fParkourArea 帮助 &b====="
+  line: "&e/{command} &7- {desc}"
+  footer: "&7权限节点前缀: parkour.*"
+
+# 区域类型显示名
+zone-type:
+  GLOBAL: "&6全局区域"
+  LOBBY: "&e大厅区域"
+  LEVEL: "&a关卡区域"
+  START: "&b起点区域"
+  END: "&d终点区域"
+
+command:
+  no-permission: "&c你没有权限执行此操作。"
+  player-only: "&c该命令只能由玩家执行。"
+  created: "&a已创建区域 &e#{id} {name} &a({type}, {shape})。"
+  deleted: "&a已删除区域 &e#{id}{children}。"
+  delete-children-suffix: " &7及其 {n} 个子区域"
+  not-found: "&c未找到区域: {query}"
+  name-required: "&c该区域类型需要指定名称。"
+  need-selection: "&c请先用 WorldEdit 选区，或手动提供坐标参数。"
+  invalid-shape: "&c该区域类型不支持此选区模式。"
+  invalid-hierarchy: "&c区域层级非法: {reason}"
+  intersect: "&c与同级区域几何相交。"
+  edit-mode-required: "&c需要先进入编辑模式 (&e/parkour editmode true&c) 才能使用编辑命令。"
+  edit-mode-block: "&c非编辑模式下不能在跑酷区域内放置或破坏方块。"
+  edit-mode-on: "&a已进入编辑模式（区域内交互将不触发跑酷玩法）。"
+  edit-mode-off: "&a已退出编辑模式。"
+  reloaded: "&a配置已重载。"
+  confirm-required: "&e请再次执行以确认: &f/{command}"
+  cancelled: "&7操作已取消。"
+  sound-toggle: "&a存档点音效已{state}。"
+  sound-master-on: "&a所有跑酷音效 &f已开启"
+  sound-master-off: "&7所有跑酷音效 &f已关闭"
+  sound-checkpoint-on: "&a存档点音效 &f已开启"
+  sound-checkpoint-off: "&7存档点音效 &f已关闭"
+  sound-block-on: "&a效果块音效 &f已开启"
+  sound-block-off: "&7效果块音效 &f已关闭"
+  sound-usage: "&c用法: /parkour sound <checkpoint|block> <on|off>"
+
+info:
+  header: "&b===== &f区域信息 &b====="
+  line: "&7#{id} &f{name} &8| {type} &8| {shape} &8| parent={parent}"
+  bounds-cuboid: "&8范围: ({x1},{y1},{z1}) -> ({x2},{y2},{z2})"
+  bounds-sphere: "&8范围: 中心 ({x},{y},{z}) 半径 {r}"
+  world: "&8世界: {world}"
+  none-at-pos: "&7当前位置不在任何区域内。"
+
+list:
+  header: "&b===== &f区域列表 &b====="
+  empty: "&7暂无区域。"
+
+actionbar:
+  # 游玩中：当前用时 + 星级 / 最佳用时
+  playing: "&b{current} &r{stars}\n&7best: &a{best}"
+  # 触发存档点后持续提示直到离开
+  checkpoint: "&a✔ 存档点已记录"
+  # 进入起点时
+  at-start: "&e站在起点 &7— 离开即开始计时"
+  # 通关
+  completed: "&a✔ 通关! 用时 &e{time}"
+
+menu:
+  main-title: "&bParkour 菜单"
+  level-select-title: "&a选择关卡"
+  leaderboard-title: "&e{level} 排行榜"
+  confirm-title: "&c确认删除?"
+  level-grey-name: "&7{index}. {name}"
+  level-yellow-name: "&e{index}. {name}"
+  level-green-name: "&a{index}. {name}"
+  lore-best: "&7最佳: &a{best}"
+  lore-status-grey: "&7未解锁"
+  lore-status-yellow: "&e可挑战"
+  lore-status-green: "&a已通关"
+
+parkour:
+  marked: "&a你已进入跑酷区域。"
+  unmarked: "&7你已离开跑酷区域。"
+  teleported-lobby: "&e已返回大厅（跳关/防挂机）。"
+  teleported-checkpoint: "&e已回到上一个存档点。"
+  teleported-start: "&e已重玩本关。"
+  idle-invalidated: "&c长时间未活动，成绩作废。"
+  skip-detected: "&c检测到跳关，已传送回大厅。"
+  visibility-full: "&b其他玩家可见性: &f完全可见"
+  visibility-half: "&b其他玩家可见性 &f缩小为 x0.5"
+  visibility-tenth: "&b其他玩家可见性 &f缩小为 x0.1"
+  visibility-hidden: "&b其他玩家可见性: &7不可见"
