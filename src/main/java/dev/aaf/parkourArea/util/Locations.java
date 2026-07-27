@@ -69,6 +69,8 @@ public final class Locations {
      * {@code orientZone} 提供朝向（可用 spawn.yaw/pitch 覆盖）。坐标 fallback：
      * spawn 显式值 → 区域几何默认（中心 + 该列最高非空气方块上一格）；
      * 朝向 fallback：orientSpawn → posSpawn → 0/0。
+     *
+     * <p>典型：大厅 tp 传 {@code (lobby, lobby)}；起点 tp 传 {@code (start, level)}。</p>
      */
     public static Location teleportLocation(World world, Zone posZone, Zone orientZone) {
         return teleportLocation(world, posZone, orientZone, 0f, 0f);
@@ -93,6 +95,7 @@ public final class Locations {
 
     /**
      * 按 keepRotation 配置解析传送目标：true 时 spawn 未指定的朝向字段保留玩家当前朝向。
+     * {@code playerLoc} 仅在 keepRotation=true 时使用，此时不得为 null。
      */
     public static Location teleportLocation(World world, Zone posZone, Zone orientZone,
                                             boolean keepRotation, Location playerLoc) {
