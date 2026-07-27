@@ -4,6 +4,9 @@
 #       想用 MiniMessage 请写纯标签、不要混 & 码
 # 变量用 {xxx} 占位
 
+# 配置文件版本（请勿手改）：见 config.yml 的 config-version 说明
+messages-version: 2
+
 prefix: "&8[&bParkour&8] &r"
 
 help:

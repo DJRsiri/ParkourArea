@@ -1,3 +1,6 @@
+# 配置文件版本（请勿手改）：见 config.yml 的 config-version 说明
+blocks-version: 2
+
 # 方块踩踏命令配置
 # 当玩家踩在指定方块（脚下方块，y-0.1 检测）上时执行
 # 支持变量: %player% 玩家名, 以及 PlaceholderAPI 变量 (需安装 PAPI)

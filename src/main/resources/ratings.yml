@@ -1,3 +1,6 @@
+# 配置文件版本（请勿手改）：见 config.yml 的 config-version 说明
+ratings-version: 2
+
 # 用时评级配置（降星）
 # 每个关卡一条，key 为关卡区域的数字 ID（与 /parkour list 显示的 id 一致）
 # 共 3 档：用时达到 tier1 内为三星，tier2 内为两星，tier3 内为一星，超过 tier3 则闪烁
