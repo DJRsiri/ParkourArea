@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,6 +24,7 @@ public final class ConfigService {
     private final Messages messages = new Messages();
     private FileConfiguration blocksCfg;
     private FileConfiguration ratingsCfg;
+    private ConfigVersionChecker versionChecker;
 
     public ConfigService(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -85,6 +87,21 @@ public final class ConfigService {
 
         // ---- ratings.yml ----
         ratingsCfg = YamlConfiguration.loadConfiguration(ensure("ratings.yml"));
+
+        // ---- 配置文件版本检测（控制台 + 游戏内管理员警告）----
+        if (versionChecker == null) {
+            versionChecker = new ConfigVersionChecker(plugin);
+        }
+        List<ConfigVersionChecker.Outdated> outdated = versionChecker.check();
+        for (ConfigVersionChecker.Outdated o : outdated) {
+            plugin.getLogger().warning("配置文件 " + o.file() + " 版本过旧 (当前 v" + o.current()
+                    + ", 期望 v" + o.expected() + ")，请用 /parkour updateconf 更新"
+                    + "或 /parkour recreateconf 重建");
+            messages.sendToAdmins("command.config-outdated", Map.of(
+                    "file", o.file(),
+                    "current", String.valueOf(o.current()),
+                    "expected", String.valueOf(o.expected())));
+        }
     }
 
     private File ensure(String resource) {
@@ -109,5 +126,9 @@ public final class ConfigService {
 
     public FileConfiguration ratings() {
         return ratingsCfg;
+    }
+
+    public ConfigVersionChecker versionChecker() {
+        return versionChecker;
     }
 }

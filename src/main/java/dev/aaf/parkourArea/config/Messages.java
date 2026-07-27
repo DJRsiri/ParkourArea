@@ -1,10 +1,13 @@
 package dev.aaf.parkourArea.config;
 
+import dev.aaf.parkourArea.command.Permission;
 import dev.aaf.parkourArea.util.ColorUtil;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.Map;
@@ -56,6 +59,15 @@ public final class Messages {
 
     public void send(CommandSender sender, String path, Map<String, String> vars) {
         sender.sendMessage(prefixed(path, vars));
+    }
+
+    /** 向所有在线管理员（parkour.admin）发送（版本警告等管理员通知）。 */
+    public void sendToAdmins(String path, Map<String, String> vars) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission(Permission.ADMIN)) {
+                send(p, path, vars);
+            }
+        }
     }
 
     public Component prefix() {
