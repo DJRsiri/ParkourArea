@@ -10,7 +10,9 @@
 
 - **Paper + Folia 双兼容**：直接使用 paper-api 暴露的 region/async/global/entity 调度器，一套代码两端运行。
 - **区域层级**：全局 ⊃ [大厅, 关卡 [起点 & 终点]]，自动校验父子关系与几何包含；支持 cuboid 与 sphere 选区。
-- **关卡计时**：每关记录前 10 次通关用时与最佳用时，GUI 展示。
+- **关卡计时**：每关记录前 10 次通关用时与最佳用时。
+- **用时排行榜**：总览页按 GLOBAL 区域平铺关卡（lore 显示我的最佳 + 全服前 3，翻页 + 区域切换），
+  点击关卡查看详细（我的最佳 / 最近 10 次 / 全服第 1-10 / 第 11-20 名）。
 - **降星评级**：3 档时间阈值降星，超时闪烁（每 500ms 交替）。
 - **选关/删档**：灰/黄/绿混凝土区分关卡状态，玩家只能选非灰色关卡；删档后限制选择。
 - **中途存档点**：默认踩金块记录，actionbar 持续提示，通关/重玩/返回大厅/离开清除。
@@ -36,13 +38,18 @@
 | `/parkour editmode [true\|false]` | *切换编辑模式 |
 | `/parkour create <type> <name\|-> [parent\|-\|here] [cuboid\|sphere] <coords...>` | *创建区域 |
 | `/parkour delete <zoneid/zonename>` | *删除区域（二次确认，级联删除子区域） |
-| `/parkour edit <zoneid/zonename> rename <newname>` | *编辑区域 |
+| `/parkour edit <zoneid/zonename> rename <newname>` | *重命名区域 |
+| `/parkour edit <zoneid/zonename> spawn <x> <y> <z> <yaw> <pitch>` | *设置区域传送点（全量） |
+| `/parkour edit <zoneid/zonename> spawn yaw <yaw> [pitch <pitch>]` | *仅设置传送朝向 |
+| `/parkour edit <zoneid/zonename> spawn clear` | *清除区域传送点 |
 | `/parkour info [zoneid/zonename \| pos <x> <y> <z>]` | 显示单个区域信息 |
 | `/parkour info-all [zoneid/zonename \| pos <x> <y> <z>]` | 显示当前位置所有关系区域 |
 | `/parkour list` | 列出所有区域 |
 | `/parkour togglesound [all\|checkpoint\|block] [on\|off]` | 切换跑酷音效（选项留空默认 all，on/off 留空为切换） |
 | `/parkour resetsave <levelzone>` | 删除玩家在某关的存档（二次确认） |
 | `/parkour reload` | *重载全部配置 |
+| `/parkour updateconf` | *更新过旧配置文件（备份 .bak 并合并新增配置项） |
+| `/parkour recreateconf` | *重建全部配置文件（备份 .bak，二次确认；不含 zones.yml） |
 
 ### create 参数说明
 
@@ -71,11 +78,29 @@
 
 详见各配置文件头部注释。关键项：
 
-- `config.yml`：检测周期、防挂机阈值、存档点方块、要求游戏模式等
+- `config.yml`：检测周期、防挂机阈值、存档点方块、要求游戏模式、传送朝向（`settings.teleport-keep-rotation`）等
 - `blocks.yml`：踩方块触发的命令/音效
 - `ratings.yml`：每关降星评级（以关卡区域 ID 为 key）
 - `messages.yml`：全部文案（兼容 legacy `&` 码与 MiniMessage）
 - `zones.yml`：区域定义（通常用命令管理，也可手动编辑后 `/parkour reload`）
+
+### 传送朝向
+
+`settings.teleport-keep-rotation`（默认 `true`）：传送（回大厅/选关起点/重玩/回存档点）时，
+区域 spawn 未手动指定 yaw/pitch 的字段保留玩家当前朝向；设为 `false` 则未指定字段回落 `0/0`。
+手动指定朝向用 `/parkour edit <zone> spawn yaw <yaw> [pitch <pitch>]`（大厅挂 LOBBY 区域、
+关卡朝向挂 LEVEL 区域）。
+
+### 配置文件版本管理
+
+`config.yml` / `messages.yml` / `blocks.yml` / `ratings.yml` 各自带版本键（`config-version` 等）。
+插件升级后若数据目录中的版本低于 jar 内置版本，启动/重载时控制台警告，并向在线及进服的
+`parkour.admin` 管理员逐文件提示。处理方式：
+
+- `/parkour updateconf`：把过旧文件备份为 `<文件名>.bak`（已存在则 `.bak1`、`.bak2` 递增），
+  再以 jar 新版为底合并——你的修改保留，新增配置项自动补入；文件损坏无法合并时提示重建。
+- `/parkour recreateconf`：二次确认后把四个配置文件全部备份为 `.bak` 并从 jar 重建。
+  **不影响 `zones.yml`（区域数据）与 `parkour.db`（数据库）。**
 
 ## 权限
 
