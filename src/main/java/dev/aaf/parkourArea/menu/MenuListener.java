@@ -79,8 +79,9 @@ public final class MenuListener implements Listener {
             org.bukkit.World world = start.worldUid() != null
                     ? org.bukkit.Bukkit.getWorld(start.worldUid()) : p.getWorld();
             if (world != null) {
-                // 坐标取自 START（spawn 或中心 + 最高非空气方块），朝向取自所属 LEVEL 的 spawn（缺省 0/0）
-                p.teleport(dev.aaf.parkourArea.util.Locations.teleportLocation(world, start, level));
+                // 坐标取自 START；朝向：LEVEL spawn 显式值优先，未指定字段按配置保留玩家当前朝向
+                p.teleport(dev.aaf.parkourArea.util.Locations.teleportLocation(world, start, level,
+                        plugin.configService().settings().teleportKeepRotation(), p.getLocation()));
             }
         }, () -> {});
         plugin.messages().send(player, "parkour.teleported-start");
@@ -97,7 +98,11 @@ public final class MenuListener implements Listener {
         int y = session.checkpointY();
         int z = session.checkpointZ();
         plugin.scheduler().runEntity(player, p -> {
-            p.teleport(new Location(p.getWorld(), x + 0.5, y + 1, z + 0.5));
+            boolean keep = plugin.configService().settings().teleportKeepRotation();
+            // 保留玩家当前 yaw/pitch（keep=false 时回落 0/0）
+            p.teleport(new Location(p.getWorld(), x + 0.5, y + 1, z + 0.5,
+                    keep ? p.getLocation().getYaw() : 0f,
+                    keep ? p.getLocation().getPitch() : 0f));
             plugin.messages().send(p, "parkour.teleported-checkpoint");
         }, () -> {});
     }

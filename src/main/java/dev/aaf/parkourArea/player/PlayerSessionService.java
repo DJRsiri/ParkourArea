@@ -218,8 +218,9 @@ public final class PlayerSessionService {
                 World world = lobby.worldUid() != null
                         ? Bukkit.getWorld(lobby.worldUid()) : p.getWorld();
                 if (world != null) {
-                    // 坐标+朝向均来自 LOBBY 的 spawn 配置（缺省：中心 + 最高非空气方块上一格 + 0/0）
-                    p.teleport(Locations.teleportLocation(world, lobby, lobby));
+                    // 坐标+朝向均来自 LOBBY spawn；未指定朝向字段按配置保留玩家当前朝向
+                    p.teleport(Locations.teleportLocation(world, lobby, lobby,
+                            plugin.configService().settings().teleportKeepRotation(), p.getLocation()));
                 }
             }
             plugin.messages().send(p, "parkour.teleported-lobby");
