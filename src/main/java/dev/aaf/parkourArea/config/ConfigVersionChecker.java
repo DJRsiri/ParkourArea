@@ -174,4 +174,9 @@ public final class ConfigVersionChecker {
     public File fileOf(String resourceName) {
         return new File(plugin.getDataFolder(), resourceName);
     }
+
+    /** 供命令使用：触发插件 saveResource 重建。 */
+    public void saveResource(String resourceName) {
+        plugin.saveResource(resourceName, false);
+    }
 }
