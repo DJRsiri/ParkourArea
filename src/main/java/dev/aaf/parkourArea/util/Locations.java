@@ -66,12 +66,20 @@ public final class Locations {
 
     /**
      * 解析传送目标 Location。{@code posZone} 提供坐标（可用 spawn.x/y/z 覆盖），
-     * {@code orientZone} 提供朝向（可用 spawn.yaw/pitch 覆盖）。各字段逐级 fallback：
-     * spawn 显式值 → 区域几何默认（坐标=中心 + 该列最高非空气方块上一格，朝向=0/0）。
-     *
-     * <p>典型：大厅 tp 传 {@code (lobby, lobby)}；起点 tp 传 {@code (start, level)}。</p>
+     * {@code orientZone} 提供朝向（可用 spawn.yaw/pitch 覆盖）。坐标 fallback：
+     * spawn 显式值 → 区域几何默认（中心 + 该列最高非空气方块上一格）；
+     * 朝向 fallback：orientSpawn → posSpawn → 0/0。
      */
     public static Location teleportLocation(World world, Zone posZone, Zone orientZone) {
+        return teleportLocation(world, posZone, orientZone, 0f, 0f);
+    }
+
+    /**
+     * 带朝向 fallback 的传送解析：spawn 未显式指定的 yaw/pitch 字段用
+     * {@code fallbackYaw/fallbackPitch}（调用方可传玩家当前朝向以保留视角）。
+     */
+    public static Location teleportLocation(World world, Zone posZone, Zone orientZone,
+                                            float fallbackYaw, float fallbackPitch) {
         ZoneSpawn ps = posZone.spawn();
         ZoneSpawn os = orientZone == null ? null : orientZone.spawn();
         double cx = ps != null && ps.x() != null ? ps.x() : centerX(posZone);
@@ -79,10 +87,34 @@ public final class Locations {
         double cy = ps != null && ps.y() != null
                 ? ps.y()
                 : highestNonAirY(world, (int) Math.floor(cx), (int) Math.floor(cz));
-        float yaw = os != null && os.yaw() != null ? os.yaw().floatValue()
-                : (ps != null && ps.yaw() != null ? ps.yaw().floatValue() : 0f);
-        float pitch = os != null && os.pitch() != null ? os.pitch().floatValue()
-                : (ps != null && ps.pitch() != null ? ps.pitch().floatValue() : 0f);
-        return new Location(world, cx, cy, cz, yaw, pitch);
+        float[] yp = resolveYawPitch(ps, os, fallbackYaw, fallbackPitch);
+        return new Location(world, cx, cy, cz, yp[0], yp[1]);
+    }
+
+    /**
+     * 按 keepRotation 配置解析传送目标：true 时 spawn 未指定的朝向字段保留玩家当前朝向。
+     */
+    public static Location teleportLocation(World world, Zone posZone, Zone orientZone,
+                                            boolean keepRotation, Location playerLoc) {
+        return keepRotation
+                ? teleportLocation(world, posZone, orientZone, playerLoc.getYaw(), playerLoc.getPitch())
+                : teleportLocation(world, posZone, orientZone);
+    }
+
+    /**
+     * 解析 tp 朝向（yaw/pitch 逐字段独立 fallback）：
+     * orientSpawn 显式值 → posSpawn 显式值 → fallback。
+     *
+     * @return float[2]：{yaw, pitch}
+     */
+    public static float[] resolveYawPitch(ZoneSpawn posSpawn, ZoneSpawn orientSpawn,
+                                          float fallbackYaw, float fallbackPitch) {
+        float yaw = orientSpawn != null && orientSpawn.yaw() != null
+                ? orientSpawn.yaw().floatValue()
+                : (posSpawn != null && posSpawn.yaw() != null ? posSpawn.yaw().floatValue() : fallbackYaw);
+        float pitch = orientSpawn != null && orientSpawn.pitch() != null
+                ? orientSpawn.pitch().floatValue()
+                : (posSpawn != null && posSpawn.pitch() != null ? posSpawn.pitch().floatValue() : fallbackPitch);
+        return new float[]{yaw, pitch};
     }
 }
