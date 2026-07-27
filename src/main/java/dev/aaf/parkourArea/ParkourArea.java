@@ -12,6 +12,7 @@ import dev.aaf.parkourArea.command.ParkourCommand;
 import dev.aaf.parkourArea.command.ReloadSubCommand;
 import dev.aaf.parkourArea.command.ResetSaveSubCommand;
 import dev.aaf.parkourArea.command.ToggleSoundSubCommand;
+import dev.aaf.parkourArea.command.UpdateConfSubCommand;
 import dev.aaf.parkourArea.command.GuiSubCommand;
 import dev.aaf.parkourArea.concurrency.Scheduler;
 import dev.aaf.parkourArea.concurrency.UnifiedScheduler;
@@ -223,6 +224,7 @@ public final class ParkourArea extends JavaPlugin {
         commandRoot.register(new ListSubCommand(this));
         commandRoot.register(new EditSubCommand(this));
         commandRoot.register(new EditModeSubCommand(this));
+        commandRoot.register(new UpdateConfSubCommand(this));
     }
 
     public void reloadAll() {
