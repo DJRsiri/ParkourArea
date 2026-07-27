@@ -22,7 +22,8 @@ public record Settings(
         boolean debug,
         boolean soundEnabled,
         boolean blockSoundEnabled,
-        VisibilityMode defaultVisibilityMode
+        VisibilityMode defaultVisibilityMode,
+        boolean teleportKeepRotation
 ) {
     /** 玩家当前游戏模式是否满足标记为跑酷玩家的要求。 */
     public boolean requiresGameMode(GameMode mode) {

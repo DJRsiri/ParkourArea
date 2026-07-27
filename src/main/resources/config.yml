@@ -1,6 +1,10 @@
 # ParkourArea 全局配置
 # 重载命令: /parkour reload
 
+# 配置文件版本（请勿手改）。数据目录中的版本低于 jar 内置版本时，启动/重载会在控制台
+# 与游戏内警告；可用 /parkour updateconf 合并新增配置项，或 /parkour recreateconf 重建
+config-version: 2
+
 settings:
   # 区域/方块/存档点检测周期（单位 tick，20tick=1秒）。默认 1 = 每 tick 检测刷新（起点/终点/计时器等）。
   # 玩家极多时为降低 global region 单线程开销可调大（如 2）。
@@ -31,6 +35,9 @@ settings:
   default-visibility-mode: FULL
   # 评级 >tier3 时每多少毫秒交替闪烁一次
   rating-flicker-interval-millis: 500
+  # 传送朝向：true = 区域 spawn 未手动指定 yaw/pitch 的字段保留玩家当前朝向；
+  # false = 未指定字段回落 0/0（正南平视）
+  teleport-keep-rotation: true
 
 # 默认编辑模式状态（启动时全局编辑模式开关）
 edit-mode-default: false
