@@ -218,7 +218,8 @@ public final class PlayerSessionService {
                 World world = lobby.worldUid() != null
                         ? Bukkit.getWorld(lobby.worldUid()) : p.getWorld();
                 if (world != null) {
-                    // 坐标+朝向均来自 LOBBY spawn；未指定朝向字段按配置保留玩家当前朝向
+                    // 坐标/朝向取 LOBBY spawn（坐标缺省取区域中心+最高非空气方块）；
+                    // 未指定朝向字段按配置保留玩家当前朝向或回落 0/0
                     p.teleport(Locations.teleportLocation(world, lobby, lobby,
                             plugin.configService().settings().teleportKeepRotation(), p.getLocation()));
                 }

@@ -127,7 +127,8 @@ public final class LevelSelectMenu extends ParkourMenu {
             org.bukkit.World world = start.worldUid() != null
                     ? org.bukkit.Bukkit.getWorld(start.worldUid()) : p.getWorld();
             if (world != null) {
-                // 坐标取自 START；朝向：LEVEL spawn 显式值优先，未指定字段按配置保留玩家当前朝向
+                // 坐标取 START（spawn 显式值，缺省取区域中心+最高非空气方块）；
+                // 朝向取 LEVEL spawn 优先，未指定字段按配置保留玩家当前朝向或回落 0/0
                 p.teleport(dev.aaf.parkourArea.util.Locations.teleportLocation(world, start, level,
                         plugin.configService().settings().teleportKeepRotation(), p.getLocation()));
             }
