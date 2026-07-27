@@ -91,4 +91,24 @@ class ConfigVersionCheckerTest {
         assertThat(merged.getString("settings.new-key")).isEqualTo("hello"); // 新键补入
         assertThat(merged.getInt("config-version")).isEqualTo(2);       // 版本键刷新
     }
+
+    @Test
+    void readVersionCorruptFileIsOne() throws IOException {
+        File f = tempDir.resolve("bad.yml").toFile();
+        Files.writeString(f.toPath(), "key: [unclosed\n");
+        assertThat(ConfigVersionChecker.readVersion(f, "config-version")).isEqualTo(1);
+    }
+
+    @Test
+    void mergeReturnsFalseOnCorruptOldFile() throws Exception {
+        File target = tempDir.resolve("config.yml").toFile();
+        String corrupt = "key: [unclosed\n";
+        Files.writeString(target.toPath(), corrupt);
+        YamlConfiguration defaults = new YamlConfiguration();
+        defaults.set("config-version", 2);
+
+        assertThat(ConfigVersionChecker.mergeWithDefaults(target, defaults)).isFalse();
+        // 合并失败不得改写原文件（留给 recreateconf 流程处理）
+        assertThat(Files.readString(target.toPath())).isEqualTo(corrupt);
+    }
 }

@@ -107,6 +107,7 @@ public final class ConfigVersionChecker {
 
     /** 计算下一个备份文件：config.yml → config.yml.bak；已存在则 .bak1、.bak2… */
     public static File nextBackupFile(File source) {
+        // 调用方均为数据目录内文件，必有父目录；getParentFile() 为 null 时退化为相对 CWD
         File bak = new File(source.getParentFile(), source.getName() + ".bak");
         if (!bak.exists()) {
             return bak;
