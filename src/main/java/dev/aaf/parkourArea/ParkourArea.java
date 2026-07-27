@@ -9,6 +9,7 @@ import dev.aaf.parkourArea.command.EditSubCommand;
 import dev.aaf.parkourArea.command.InfoSubCommand;
 import dev.aaf.parkourArea.command.ListSubCommand;
 import dev.aaf.parkourArea.command.ParkourCommand;
+import dev.aaf.parkourArea.command.RecreateConfSubCommand;
 import dev.aaf.parkourArea.command.ReloadSubCommand;
 import dev.aaf.parkourArea.command.ResetSaveSubCommand;
 import dev.aaf.parkourArea.command.ToggleSoundSubCommand;
@@ -225,6 +226,7 @@ public final class ParkourArea extends JavaPlugin {
         commandRoot.register(new EditSubCommand(this));
         commandRoot.register(new EditModeSubCommand(this));
         commandRoot.register(new UpdateConfSubCommand(this));
+        commandRoot.register(new RecreateConfSubCommand(this));
     }
 
     public void reloadAll() {
