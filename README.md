@@ -40,6 +40,7 @@
 | `/parkour create <type> <name\|-> [parent\|-\|here] [cuboid\|sphere] <coords...>` | *创建区域 |
 | `/parkour delete <zoneid/zonename>` | *删除区域（二次确认，级联删除子区域） |
 | `/parkour edit <zoneid/zonename> rename <newname>` | *重命名区域 |
+| `/parkour edit <zoneid/zonename> spawn [here]` | *取当前位置与朝向为传送点（留空默认 here） |
 | `/parkour edit <zoneid/zonename> spawn <x> <y> <z> <yaw> <pitch>` | *设置区域传送点（全量） |
 | `/parkour edit <zoneid/zonename> spawn yaw <yaw> [pitch <pitch>]` | *仅设置传送朝向 |
 | `/parkour edit <zoneid/zonename> spawn clear` | *清除区域传送点 |

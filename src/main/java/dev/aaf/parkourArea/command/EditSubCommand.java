@@ -20,6 +20,7 @@ import java.util.Map;
  * <p>支持：
  * <ul>
  *   <li>{@code rename <newname>}</li>
+ *   <li>{@code spawn [here]}（取当前位置与朝向为传送点，留空默认 here）</li>
  *   <li>{@code spawn <x> <y> <z> <yaw> <pitch>}（全量设置传送点）</li>
  *   <li>{@code spawn yaw <yaw> [pitch <pitch>]}（仅改朝向，常用于关卡 LEVEL）</li>
  *   <li>{@code spawn clear}（清除传送点）</li>
@@ -51,7 +52,7 @@ public final class EditSubCommand implements SubCommand {
 
     @Override
     public String usage() {
-        return "<zoneid/zonename> rename <newname> | spawn <x> <y> <z> <yaw> <pitch> | spawn yaw <yaw> [pitch <pitch>] | spawn clear | resize <x1> <y1> <z1> <x2> <y2> <z2> | resize <cx> <cy> <cz> <radius> | resize (WE 选区)";
+        return "<zoneid/zonename> rename <newname> | spawn [here] | spawn <x> <y> <z> <yaw> <pitch> | spawn yaw <yaw> [pitch <pitch>] | spawn clear | resize <x1> <y1> <z1> <x2> <y2> <z2> | resize <cx> <cy> <cz> <radius> | resize (WE 选区)";
     }
 
     @Override
@@ -90,6 +91,20 @@ public final class EditSubCommand implements SubCommand {
         if (a.length >= 1 && "clear".equalsIgnoreCase(a[0])) {
             plugin.zoneRepository().setSpawn(z.id(), null);
             plugin.messages().send(sender, "command.spawn-cleared",
+                    Map.of("id", String.valueOf(z.id())));
+            return;
+        }
+        // here（或留空默认）：取玩家当前位置与朝向作为传送点
+        if (a.length == 0 || "here".equalsIgnoreCase(a[0])) {
+            if (!(sender instanceof Player player)) {
+                plugin.messages().send(sender, "command.player-only");
+                return;
+            }
+            var loc = player.getLocation();
+            plugin.zoneRepository().setSpawn(z.id(), ZoneSpawn.of(
+                    loc.getX(), loc.getY(), loc.getZ(),
+                    (double) loc.getYaw(), (double) loc.getPitch()));
+            plugin.messages().send(sender, "command.spawn-set",
                     Map.of("id", String.valueOf(z.id())));
             return;
         }
@@ -225,7 +240,7 @@ public final class EditSubCommand implements SubCommand {
         }
         if (args.length == 3 && "spawn".equalsIgnoreCase(args[1])) {
             String p = args[2].toLowerCase(Locale.ROOT);
-            return java.util.stream.Stream.of("clear", "yaw", "pitch").filter(s -> s.startsWith(p)).toList();
+            return java.util.stream.Stream.of("clear", "here", "yaw", "pitch").filter(s -> s.startsWith(p)).toList();
         }
         return List.of();
     }
