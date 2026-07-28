@@ -6,6 +6,8 @@ blocks-version: 2
 # 支持变量: %player% 玩家名, 以及 PlaceholderAPI 变量 (需安装 PAPI)
 # command/sound 填 [] 表示禁用此项
 # repeat: true 时按 interval（tick）重复触发
+# 命令静默执行（无反馈刷屏）；执行前自动清除玩家受伤冷却，
+# /damage 类命令不会被受伤无敌帧吞掉
 #
 # 方块名使用 Bukkit Material 名称（小写）
 
