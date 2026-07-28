@@ -10,8 +10,8 @@ import org.bukkit.command.TabCompleter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +23,8 @@ import java.util.Set;
 public final class ParkourCommand implements CommandExecutor, TabCompleter {
 
     private final ParkourArea plugin;
-    private final Map<String, SubCommand> subs = new HashMap<>();
+    // LinkedHashMap：帮助页按注册顺序稳定显示
+    private final Map<String, SubCommand> subs = new LinkedHashMap<>();
 
     public ParkourCommand(ParkourArea plugin) {
         this.plugin = plugin;

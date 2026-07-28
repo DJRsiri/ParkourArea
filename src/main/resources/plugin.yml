@@ -32,9 +32,14 @@ permissions:
   parkour.admin:
     description: 管理员权限（创建/删除/编辑区域等）
     default: op
+    children:
+      parkour.edit: true
+      parkour.user: true
   parkour.edit:
     description: 编辑模式权限
     default: op
+    children:
+      parkour.user: true
   parkour.user:
     description: 普通玩家权限（游玩、打开菜单）
     default: true

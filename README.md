@@ -112,9 +112,11 @@
 | 节点 | 默认 | 说明 |
 |---|---|---|
 | `parkour.*` | op | 全部权限 |
-| `parkour.admin` | op | 创建/删除/编辑/重载 |
-| `parkour.edit` | op | 编辑模式 |
+| `parkour.admin` | op | 创建/删除/编辑/重载（蕴含 edit、user） |
+| `parkour.edit` | op | 编辑模式（蕴含 user） |
 | `parkour.user` | true | 游玩、打开菜单 |
+
+`/parkour` 帮助页与 tab 补全按执行者拥有的权限节点过滤：没有对应权限的子命令不显示、不补全。
 
 ## PlaceholderAPI 变量
 
