@@ -9,6 +9,11 @@ public enum ProgressStatus {
     /** 已通关（菜单显示绿色）。 */
     COMPLETED;
 
+    /** 到访起点的状态迁移：已通关不退化（保持 COMPLETED），其余变为 VISITED。 */
+    public ProgressStatus onVisit() {
+        return this == COMPLETED ? COMPLETED : VISITED;
+    }
+
     public static ProgressStatus parse(String s) {
         if (s == null) {
             return NONE;

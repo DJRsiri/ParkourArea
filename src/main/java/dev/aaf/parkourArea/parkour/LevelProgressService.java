@@ -80,6 +80,15 @@ public final class LevelProgressService {
         return cache.getOrDefault(uuid, Collections.emptyMap());
     }
 
+    /** 登记"到过起点"：进度单调，已通关关不降级（COMPLETED 不被 VISITED 覆盖）。 */
+    public void markVisited(UUID uuid, int levelId) {
+        ProgressStatus cur = getStatus(uuid, levelId);
+        ProgressStatus next = cur.onVisit();
+        if (next != cur) {
+            setStatus(uuid, levelId, next);
+        }
+    }
+
     public void setStatus(UUID uuid, int levelId, ProgressStatus status) {
         cache.computeIfAbsent(uuid, k -> new HashMap<>()).put(levelId, status);
         plugin.scheduler().runAsync(() -> {

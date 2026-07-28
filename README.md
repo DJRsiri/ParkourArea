@@ -19,7 +19,8 @@
 - **方块踩踏命令**：配置踩指定方块执行命令/音效，支持 repeat 与 %player% / PlaceholderAPI 变量；
   命令静默执行（反馈不刷屏、不动 gamerule），执行前自动清除受伤冷却，/damage 类命令立即生效。
 - **防挂机**：60s 无移动或视角变化作废成绩并传回大厅。
-- **跳关检测**：未按顺序游玩自动返回大厅，不计成绩。
+- **跳关检测**：未按顺序游玩自动返回大厅，不计成绩；途经/回走非所选关区域不触发误报，
+  可用 `settings.skip-detection` 整体关闭，或 `settings.allow-any-selectable` 放开顺序限制自由选关。
 - **快捷工具栏**：进入区域时替换热栏 9 格（重玩/返回大厅/回存档点/菜单），离开或进入编辑模式恢复。
 - **状态对账**：跑酷区域中切到非指定游戏模式或开启编辑模式会自动退出跑酷状态（保留当前游戏模式），条件恢复自动回到跑酷状态。
 
@@ -83,7 +84,8 @@
 
 详见各配置文件头部注释。关键项：
 
-- `config.yml`：检测周期、防挂机阈值、存档点方块、要求游戏模式、传送朝向（`settings.teleport-keep-rotation`）等
+- `config.yml`：检测周期、防挂机阈值、存档点方块、要求游戏模式、传送朝向（`settings.teleport-keep-rotation`）、
+  跳关检测开关（`settings.skip-detection`）、自由选关（`settings.allow-any-selectable`）等
 - `blocks.yml`：踩方块触发的命令/音效
 - `ratings.yml`：每关降星评级（以关卡区域 ID 为 key）
 - `messages.yml`：全部文案（兼容 legacy `&` 码与 MiniMessage）

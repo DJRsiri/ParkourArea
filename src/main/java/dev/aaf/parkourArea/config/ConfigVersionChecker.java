@@ -36,7 +36,7 @@ public final class ConfigVersionChecker {
         keys.put("ratings.yml", "ratings-version");
         VERSION_KEYS = Collections.unmodifiableMap(keys);
         Map<String, Integer> expected = new LinkedHashMap<>();
-        expected.put("config.yml", 2);
+        expected.put("config.yml", 3);
         expected.put("messages.yml", 3);
         expected.put("blocks.yml", 2);
         expected.put("ratings.yml", 2);

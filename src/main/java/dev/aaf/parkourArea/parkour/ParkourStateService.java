@@ -69,25 +69,34 @@ public final class ParkourStateService {
         if (level == null) {
             return;
         }
-        // 共用区域：玩家 RUNNING 且该关无独立 END → 踩 START 算通关
+        Integer selectedId = session.selectedLevel() == null ? null : session.selectedLevel().id();
+        // 共用区域（该关无独立 END）：RUNNING 本关踩 START 算通关；他关 START 忽略
         if (session.phase() == PlayerPhase.RUNNING && !hasEndZone(level)) {
-            completeLevel(player, session, level);
+            if (selectedId != null && selectedId == level.id()) {
+                completeLevel(player, session, level);
+            }
             return;
         }
-        // 跳关检测：该关 ID 大于所属 GLOBAL 内第一个未通关关
+        // RUNNING 进入非所选关起点：回走/途经——不切换状态、不惩罚
+        if (SkipRules.startIgnored(session.phase(), selectedId, level.id())) {
+            return;
+        }
+        // 跳关检测（顺序维度，受总开关与自由选关开关控制）
+        var settings = plugin.configService().settings();
         int globalId = plugin.zoneRepository().tree().globalOf(level.id());
         int nextExpected = progressService.firstNonCompletedLevelId(player.getUniqueId(), globalId);
-        if (nextExpected != -1 && level.id() > nextExpected) {
+        if (SkipRules.startIsSkip(settings.skipDetection(), settings.allowAnySelectable(),
+                level.id(), nextExpected)) {
             session.phase(PlayerPhase.INVALIDATED);
             plugin.messages().send(player, "parkour.skip-detected");
             plugin.sessionService().returnToLobby(player);
             return;
         }
-        // 合法登记起点
+        // 合法登记起点（markVisited：COMPLETED 不退化为 VISITED）
         session.selectedLevel(level);
         session.phase(PlayerPhase.AT_START);
         session.clearCheckpoint();
-        progressService.setStatus(player.getUniqueId(), level.id(), ProgressStatus.VISITED);
+        progressService.markVisited(player.getUniqueId(), level.id());
     }
 
     private void handleEnd(Player player, ParkourPlayer session, Zone endZone) {
@@ -95,16 +104,19 @@ public final class ParkourStateService {
         if (level == null) {
             return;
         }
-        if (session.phase() != PlayerPhase.RUNNING) {
-            // 不从起点出发到达终点 → 跳关/无效
-            session.phase(PlayerPhase.INVALIDATED);
-            plugin.messages().send(player, "parkour.skip-detected");
-            plugin.sessionService().returnToLobby(player);
+        Integer selectedId = session.selectedLevel() == null ? null : session.selectedLevel().id();
+        // 途经/闲逛：终点不属于所选关——忽略（不惩罚、不计成绩）
+        if (SkipRules.endIgnored(selectedId, level.id())) {
             return;
         }
-        if (session.selectedLevel() == null || session.selectedLevel().id() != level.id()) {
-            session.phase(PlayerPhase.INVALIDATED);
-            plugin.sessionService().returnToLobby(player);
+        if (session.phase() != PlayerPhase.RUNNING) {
+            // 未从起点出发到达所选关终点 → 跳关/无效；COMPLETED/INVALIDATED 停留忽略
+            if (SkipRules.endIsSkip(plugin.configService().settings().skipDetection(),
+                    session.phase())) {
+                session.phase(PlayerPhase.INVALIDATED);
+                plugin.messages().send(player, "parkour.skip-detected");
+                plugin.sessionService().returnToLobby(player);
+            }
             return;
         }
         completeLevel(player, session, level);

@@ -23,7 +23,9 @@ public record Settings(
         boolean soundEnabled,
         boolean blockSoundEnabled,
         VisibilityMode defaultVisibilityMode,
-        boolean teleportKeepRotation
+        boolean teleportKeepRotation,
+        boolean skipDetection,
+        boolean allowAnySelectable
 ) {
     /** 玩家当前游戏模式是否满足标记为跑酷玩家的要求。 */
     public boolean requiresGameMode(GameMode mode) {

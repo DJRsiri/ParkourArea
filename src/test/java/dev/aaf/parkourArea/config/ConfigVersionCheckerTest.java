@@ -64,7 +64,7 @@ class ConfigVersionCheckerTest {
     @Test
     void diffVersionsMarksOutdated() {
         List<ConfigVersionChecker.Outdated> none = ConfigVersionChecker.diffVersions(Map.of(
-                "config.yml", 2, "messages.yml", 3, "blocks.yml", 2, "ratings.yml", 2));
+                "config.yml", 3, "messages.yml", 3, "blocks.yml", 2, "ratings.yml", 2));
         assertThat(none).isEmpty();
 
         List<ConfigVersionChecker.Outdated> some = ConfigVersionChecker.diffVersions(Map.of(
@@ -72,7 +72,7 @@ class ConfigVersionCheckerTest {
         assertThat(some).hasSize(1);
         assertThat(some.get(0).file()).isEqualTo("config.yml");
         assertThat(some.get(0).current()).isEqualTo(1);
-        assertThat(some.get(0).expected()).isEqualTo(2);
+        assertThat(some.get(0).expected()).isEqualTo(3);
     }
 
     @Test

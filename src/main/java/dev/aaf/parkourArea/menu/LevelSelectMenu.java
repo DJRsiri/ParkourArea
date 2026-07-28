@@ -46,6 +46,8 @@ public final class LevelSelectMenu extends ParkourMenu {
         }
         int globalId = plugin.zoneRepository().tree().globalOf(session.currentZone().id());
         int nextExpected = plugin.progressService().firstNonCompletedLevelId(viewer.getUniqueId(), globalId);
+        // 自由选关：所有关卡均显示可挑战（无灰色解锁限制）
+        boolean anySelectable = plugin.configService().settings().allowAnySelectable();
         List<Integer> levelIds = plugin.progressService().sortedLevelIds(globalId);
         int slot = 0;
         for (int levelId : levelIds) {
@@ -63,7 +65,7 @@ public final class LevelSelectMenu extends ParkourMenu {
                 nameKey = "menu.level-green-name";
                 loreKey = "menu.lore-status-green";
                 selectable = true;
-            } else if (status == ProgressStatus.VISITED || levelId == nextExpected) {
+            } else if (status == ProgressStatus.VISITED || levelId == nextExpected || anySelectable) {
                 material = Material.YELLOW_CONCRETE;
                 nameKey = "menu.level-yellow-name";
                 loreKey = "menu.lore-status-yellow";

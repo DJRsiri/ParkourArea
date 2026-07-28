@@ -75,7 +75,9 @@ public final class ConfigService {
                 cfg.getBoolean("settings.block-sound-enabled", true),
                 VisibilityMode.parse(cfg.getString("settings.default-visibility-mode", "FULL"),
                         VisibilityMode.FULL),
-                cfg.getBoolean("settings.teleport-keep-rotation", true)
+                cfg.getBoolean("settings.teleport-keep-rotation", true),
+                cfg.getBoolean("settings.skip-detection", true),
+                cfg.getBoolean("settings.allow-any-selectable", false)
         );
 
         // ---- messages.yml ----
