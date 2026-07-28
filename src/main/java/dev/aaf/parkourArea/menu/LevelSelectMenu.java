@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 选关菜单：按通关状态显示灰/黄/绿混凝土。
+ * 选关菜单：按玩家所在 GLOBAL 过滤关卡，按通关状态显示灰/黄/绿混凝土。
  *
  * <ul>
  *   <li>NONE（未到起点、未解锁）：灰色混凝土，不可选</li>
@@ -44,8 +44,9 @@ public final class LevelSelectMenu extends ParkourMenu {
         if (session == null) {
             return;
         }
-        int nextExpected = plugin.progressService().firstNonCompletedLevelId(viewer.getUniqueId());
-        List<Integer> levelIds = plugin.progressService().sortedLevelIds();
+        int globalId = plugin.zoneRepository().tree().globalOf(session.currentZone().id());
+        int nextExpected = plugin.progressService().firstNonCompletedLevelId(viewer.getUniqueId(), globalId);
+        List<Integer> levelIds = plugin.progressService().sortedLevelIds(globalId);
         int slot = 0;
         for (int levelId : levelIds) {
             Zone level = plugin.zoneRepository().tree().getById(levelId);

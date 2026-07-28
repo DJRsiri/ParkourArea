@@ -74,8 +74,9 @@ public final class ParkourStateService {
             completeLevel(player, session, level);
             return;
         }
-        // 跳关检测：该关 ID 大于第一个未通关关
-        int nextExpected = progressService.firstNonCompletedLevelId(player.getUniqueId());
+        // 跳关检测：该关 ID 大于所属 GLOBAL 内第一个未通关关
+        int globalId = plugin.zoneRepository().tree().globalOf(level.id());
+        int nextExpected = progressService.firstNonCompletedLevelId(player.getUniqueId(), globalId);
         if (nextExpected != -1 && level.id() > nextExpected) {
             session.phase(PlayerPhase.INVALIDATED);
             plugin.messages().send(player, "parkour.skip-detected");

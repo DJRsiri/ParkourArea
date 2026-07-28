@@ -140,7 +140,7 @@ public final class LeaderboardMenu extends ParkourMenu {
 
         // 内容区：当前页关卡
         UUID uid = viewer.getUniqueId();
-        int nextExpected = plugin.progressService().firstNonCompletedLevelId(uid);
+        int nextExpected = plugin.progressService().firstNonCompletedLevelId(uid, currentGlobalId);
         int from = page * PAGE_SIZE;
         int to = Math.min(levels.size(), from + PAGE_SIZE);
         for (int i = from; i < to; i++) {

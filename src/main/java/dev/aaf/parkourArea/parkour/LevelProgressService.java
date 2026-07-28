@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * 玩家通关进度服务：内存缓存 + 异步落库。
  *
  * <p>玩家进入全局区域时 {@link #loadAsync} 异步加载；运行时 getStatus 走内存（global region 线程，无阻塞）。
- * 关卡顺序按区域数字 ID 升序（决策#2）。</p>
+ * 关卡按所属 GLOBAL 过滤，同 GLOBAL 内按区域数字 ID 升序。</p>
  */
 public final class LevelProgressService {
 
@@ -104,9 +104,9 @@ public final class LevelProgressService {
         });
     }
 
-    /** 按关卡 ID 升序的第一个未 COMPLETED 关卡 ID；全通关或无关卡返回 -1。 */
-    public int firstNonCompletedLevelId(UUID uuid) {
-        List<Integer> ids = sortedLevelIds();
+    /** 指定 GLOBAL 下按关卡 ID 升序的第一个未 COMPLETED 关卡 ID；全通关或无关卡返回 -1。 */
+    public int firstNonCompletedLevelId(UUID uuid, int globalId) {
+        List<Integer> ids = sortedLevelIds(globalId);
         for (int id : ids) {
             if (getStatus(uuid, id) != ProgressStatus.COMPLETED) {
                 return id;
@@ -115,8 +115,9 @@ public final class LevelProgressService {
         return -1;
     }
 
-    public List<Integer> sortedLevelIds() {
-        return plugin.zoneRepository().tree().all().stream()
+    /** 指定 GLOBAL 的直接 LEVEL 子区域 id 升序列表。 */
+    public List<Integer> sortedLevelIds(int globalId) {
+        return plugin.zoneRepository().tree().childrenOf(globalId).stream()
                 .filter(z -> z.type() == ZoneType.LEVEL)
                 .map(Zone::id)
                 .sorted()

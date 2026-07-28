@@ -128,6 +128,19 @@ public final class ZoneTree {
         return out;
     }
 
+    /** 沿 parent 链向上找所属 GLOBAL 区域 id（含自身为 GLOBAL）；无则 -1。 */
+    public int globalOf(int zoneId) {
+        Set<Integer> visited = new HashSet<>();
+        Zone cur = byId.get(zoneId);
+        while (cur != null && visited.add(cur.id())) {
+            if (cur.type() == ZoneType.GLOBAL) {
+                return cur.id();
+            }
+            cur = cur.parentId() == null ? null : byId.get(cur.parentId());
+        }
+        return -1;
+    }
+
     /** 某区域的所有后代（含自身），删除时用。 */
     public List<Zone> descendentsOf(int rootId) {
         List<Zone> out = new ArrayList<>();

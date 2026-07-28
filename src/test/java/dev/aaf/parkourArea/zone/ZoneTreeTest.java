@@ -54,4 +54,26 @@ class ZoneTreeTest {
 
         assertThat(tree.descendentsOf(2)).extracting(Zone::id).containsExactlyInAnyOrder(2, 3);
     }
+
+    @Test
+    void globalOfReturnsEnclosingGlobal() {
+        ZoneTree tree = new ZoneTree();
+        UUID w = UUID.randomUUID();
+        tree.add(Zone.cuboid(1, "g", ZoneType.GLOBAL, w, null, 0, 0, 0, 100, 100, 100));
+        tree.add(Zone.cuboid(2, "lv", ZoneType.LEVEL, w, 1, 10, 10, 10, 20, 20, 20));
+        tree.add(Zone.cuboid(3, "s", ZoneType.START, w, 2, 12, 12, 12, 13, 13, 13));
+        assertThat(tree.globalOf(3)).isEqualTo(1);
+        assertThat(tree.globalOf(2)).isEqualTo(1);
+        assertThat(tree.globalOf(1)).isEqualTo(1);
+    }
+
+    @Test
+    void globalOfReturnsMinusOneWhenNoGlobal() {
+        ZoneTree tree = new ZoneTree();
+        assertThat(tree.globalOf(99)).isEqualTo(-1);
+        UUID w = UUID.randomUUID();
+        // 无父 LOBBY 属非法数据（canCreate 会拒），tree 层防御返回 -1
+        tree.add(Zone.cuboid(1, "l", ZoneType.LOBBY, w, null, 0, 0, 0, 10, 10, 10));
+        assertThat(tree.globalOf(1)).isEqualTo(-1);
+    }
 }
