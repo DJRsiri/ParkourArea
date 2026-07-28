@@ -50,6 +50,7 @@ command:
   togglesound-usage: "&c用法: /parkour togglesound [all|checkpoint|block] [on|off]"
   spawn-set: "&a已设置区域 &e#{id} &a的传送点。"
   spawn-cleared: "&7已清除区域 &e#{id} &7的传送点。"
+  resized: "&a已调整区域 &e#{id} &a的范围。"
   config-outdated: "&e配置文件 &f{file} &e版本过旧 &7(当前 v{current}, 期望 v{expected})&e。请用 &f/parkour updateconf &e更新或 &f/parkour recreateconf &e重建。"
   config-up-to-date: "&a所有配置文件均为最新版本。"
   config-updated: "&a已更新配置文件: &f{files}&a（旧文件已备份为 .bak）。"
