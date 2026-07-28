@@ -213,6 +213,29 @@ public final class ZoneRepository {
         return true;
     }
 
+    /** 重设区域几何范围（edit resize 命令）。校验通过后改字段、异步保存。 */
+    public ValidationResult resize(int id, Zone newGeo) {
+        Zone z = tree.getById(id);
+        if (z == null) {
+            return ValidationResult.fail("区域不存在");
+        }
+        if (newGeo.shape() != z.shape()) {
+            return ValidationResult.fail("不允许改变区域形状（" + z.shape() + "）");
+        }
+        ValidationResult r = ZoneHierarchy.canResize(z, newGeo, tree);
+        if (!r.valid()) {
+            return r;
+        }
+        if (z.shape() == SelectionShape.CUBOID) {
+            z.resizeCuboid(newGeo.minX(), newGeo.minY(), newGeo.minZ(),
+                    newGeo.maxX(), newGeo.maxY(), newGeo.maxZ());
+        } else {
+            z.resizeSphere(newGeo.centerX(), newGeo.centerY(), newGeo.centerZ(), newGeo.radius());
+        }
+        saveAsync();
+        return ValidationResult.ok();
+    }
+
     private void saveAsync() {
         scheduler.runAsync(this::saveNow);
     }

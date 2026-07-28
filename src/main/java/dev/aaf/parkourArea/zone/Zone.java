@@ -3,7 +3,7 @@ package dev.aaf.parkourArea.zone;
 import java.util.UUID;
 
 /**
- * 跑酷区域实体。不可变（除 name 外）。
+ * 跑酷区域实体。name / spawn / 几何范围可通过 edit 命令修改，其余不可变。
  *
  * <p>CUBOID 存两个角的方块坐标 min/max；SPHERE 存中心点与半径。
  * 世界用 UUID（重命名安全）。</p>
@@ -18,9 +18,9 @@ public final class Zone {
     private final Integer parentId;
 
     // CUBOID
-    private final int minX, minY, minZ, maxX, maxY, maxZ;
+    private int minX, minY, minZ, maxX, maxY, maxZ;
     // SPHERE
-    private final double centerX, centerY, centerZ, radius;
+    private double centerX, centerY, centerZ, radius;
     // 传送点（可空，部分字段可空；非 final，可通过 edit 命令/zones.yml 修改）
     private ZoneSpawn spawn;
 
@@ -138,6 +138,24 @@ public final class Zone {
 
     public void setSpawn(ZoneSpawn spawn) {
         this.spawn = spawn == null || spawn.isEmpty() ? null : spawn;
+    }
+
+    /** 重设 CUBOID 范围（自动 min/max 规范化）。仅 CUBOID 调用。 */
+    public void resizeCuboid(int x1, int y1, int z1, int x2, int y2, int z2) {
+        this.minX = Math.min(x1, x2);
+        this.minY = Math.min(y1, y2);
+        this.minZ = Math.min(z1, z2);
+        this.maxX = Math.max(x1, x2);
+        this.maxY = Math.max(y1, y2);
+        this.maxZ = Math.max(z1, z2);
+    }
+
+    /** 重设 SPHERE 中心与半径。仅 SPHERE 调用。 */
+    public void resizeSphere(double cx, double cy, double cz, double radius) {
+        this.centerX = cx;
+        this.centerY = cy;
+        this.centerZ = cz;
+        this.radius = radius;
     }
 
     /**

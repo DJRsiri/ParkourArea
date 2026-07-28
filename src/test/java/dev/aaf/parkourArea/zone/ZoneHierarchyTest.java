@@ -86,4 +86,66 @@ class ZoneHierarchyTest {
         Zone l2 = Zone.cuboid(3, "l2", ZoneType.LEVEL, W, 1, 20, 20, 20, 40, 40, 40); // 与 l1 相交
         assertThat(ZoneHierarchy.canCreate(l2, g, tree).valid()).isFalse();
     }
+
+    @Test
+    void resizeWithinParentAndClearOfSiblingsAllowed() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        Zone lv = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 10, 10, 10, 30, 30, 30);
+        tree.add(lv);
+        Zone newGeo = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 10, 10, 10, 40, 40, 40);
+        assertThat(ZoneHierarchy.canResize(lv, newGeo, tree).valid()).isTrue();
+    }
+
+    @Test
+    void resizeOutsideParentRejected() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        Zone lv = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 10, 10, 10, 30, 30, 30);
+        tree.add(lv);
+        Zone newGeo = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 10, 10, 10, 40, 40, 200);
+        assertThat(ZoneHierarchy.canResize(lv, newGeo, tree).valid()).isFalse();
+    }
+
+    @Test
+    void resizeIntersectingSiblingRejected() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        Zone l1 = Zone.cuboid(2, "l1", ZoneType.LEVEL, W, 1, 10, 10, 10, 30, 30, 30);
+        tree.add(l1);
+        tree.add(Zone.cuboid(3, "l2", ZoneType.LEVEL, W, 1, 40, 10, 10, 60, 30, 30));
+        Zone newGeo = Zone.cuboid(2, "l1", ZoneType.LEVEL, W, 1, 10, 10, 10, 50, 30, 30); // 扩到与 l2 相交
+        assertThat(ZoneHierarchy.canResize(l1, newGeo, tree).valid()).isFalse();
+    }
+
+    @Test
+    void resizeOverlappingOwnOldBoundsAllowed() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        Zone lv = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 10, 10, 10, 30, 30, 30);
+        tree.add(lv);
+        // 新范围与自身旧范围重叠、不与其他区域冲突 → 排除自己，应通过
+        Zone newGeo = Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 20, 10, 10, 40, 30, 30);
+        assertThat(ZoneHierarchy.canResize(lv, newGeo, tree).valid()).isTrue();
+    }
+
+    @Test
+    void resizeExposingChildRejected() {
+        ZoneTree tree = new ZoneTree();
+        Zone g = Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100);
+        tree.add(g);
+        tree.add(Zone.cuboid(2, "lv", ZoneType.LEVEL, W, 1, 80, 10, 10, 90, 30, 30));
+        Zone newGeo = Zone.cuboid(1, "g", ZoneType.GLOBAL, W, null, 0, 0, 0, 50, 100, 100); // lv 露出
+        assertThat(ZoneHierarchy.canResize(g, newGeo, tree).valid()).isFalse();
+    }
+
+    @Test
+    void resizeGlobalIntoOtherGlobalRejected() {
+        ZoneTree tree = new ZoneTree();
+        Zone g1 = Zone.cuboid(1, "g1", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100);
+        tree.add(g1);
+        tree.add(Zone.cuboid(2, "g2", ZoneType.GLOBAL, W, null, 200, 0, 0, 300, 100, 100));
+        Zone newGeo = Zone.cuboid(1, "g1", ZoneType.GLOBAL, W, null, 0, 0, 0, 250, 100, 100); // 扩进 g2
+        assertThat(ZoneHierarchy.canResize(g1, newGeo, tree).valid()).isFalse();
+    }
 }

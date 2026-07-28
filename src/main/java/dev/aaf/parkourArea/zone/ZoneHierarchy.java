@@ -49,4 +49,45 @@ public final class ZoneHierarchy {
         }
         return ValidationResult.ok();
     }
+
+    /**
+     * resize 校验（edit resize 命令）。{@code newGeo} 为携带新几何的临时 Zone
+     *（id/type/world/parent 与 current 相同，shape 已由调用方保证一致）。
+     *
+     * <p>规则：有父级 → 新范围仍 ⊆ 父级且不与同级相交；GLOBAL → 不与同世界其他
+     * GLOBAL 相交（均排除自己）；所有子区域仍 ⊆ 新范围（resize 特有）。</p>
+     */
+    public static ValidationResult canResize(Zone current, Zone newGeo, ZoneTree tree) {
+        if (current.parentId() != null) {
+            Zone parent = tree.getById(current.parentId());
+            if (parent != null && !ZoneContainment.fullyContained(parent, newGeo)) {
+                return ValidationResult.fail("区域必须完全位于父区域 (#" + parent.id() + ") 内");
+            }
+            for (Zone sibling : tree.childrenOf(current.parentId())) {
+                if (sibling.id() == current.id()) {
+                    continue;
+                }
+                if (ZoneContainment.intersects(sibling, newGeo)) {
+                    return ValidationResult.fail("与同级区域 #" + sibling.id() + " (" + sibling.type() + ") 几何相交");
+                }
+            }
+        } else {
+            for (Zone z : tree.all()) {
+                if (z.id() == current.id()) {
+                    continue;
+                }
+                if (z.type() == ZoneType.GLOBAL
+                        && java.util.Objects.equals(z.worldUid(), current.worldUid())
+                        && ZoneContainment.intersects(z, newGeo)) {
+                    return ValidationResult.fail("与同世界 GLOBAL 区域 #" + z.id() + " 几何相交");
+                }
+            }
+        }
+        for (Zone child : tree.childrenOf(current.id())) {
+            if (!ZoneContainment.fullyContained(newGeo, child)) {
+                return ValidationResult.fail("子区域 #" + child.id() + " (" + child.type() + ") 将超出新范围");
+            }
+        }
+        return ValidationResult.ok();
+    }
 }
