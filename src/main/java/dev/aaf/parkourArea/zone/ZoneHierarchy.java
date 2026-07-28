@@ -5,7 +5,7 @@ package dev.aaf.parkourArea.zone;
  *
  * <p>规则：
  * <ol>
- *   <li>无父级 → 只能是 GLOBAL，且同世界内 GLOBAL 唯一</li>
+ *   <li>无父级 → 只能是 GLOBAL，且不与同世界已有 GLOBAL 几何相交</li>
  *   <li>有父级 → 同世界、type ∈ parent.allowedChildren、完全几何包含于父级</li>
  *   <li>不与同父级任意子区域相交（避免重叠混乱）</li>
  * </ol>
@@ -21,8 +21,10 @@ public final class ZoneHierarchy {
                 return ValidationResult.fail("无父级时只能创建 GLOBAL 区域");
             }
             for (Zone z : tree.all()) {
-                if (z.type() == ZoneType.GLOBAL && z.worldUid().equals(newZone.worldUid())) {
-                    return ValidationResult.fail("该世界已存在 GLOBAL 区域");
+                if (z.type() == ZoneType.GLOBAL
+                        && java.util.Objects.equals(z.worldUid(), newZone.worldUid())
+                        && ZoneContainment.intersects(z, newZone)) {
+                    return ValidationResult.fail("与同世界 GLOBAL 区域 #" + z.id() + " 几何相交");
                 }
             }
             return ValidationResult.ok();

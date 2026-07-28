@@ -18,11 +18,28 @@ class ZoneHierarchyTest {
     }
 
     @Test
-    void secondGlobalInSameWorldRejected() {
+    void secondGlobalNonIntersectingAllowed() {
         ZoneTree tree = new ZoneTree();
         tree.add(Zone.cuboid(1, "g1", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
         Zone g2 = Zone.cuboid(2, "g2", ZoneType.GLOBAL, W, null, 200, 0, 0, 300, 100, 100);
+        assertThat(ZoneHierarchy.canCreate(g2, null, tree).valid()).isTrue();
+    }
+
+    @Test
+    void secondGlobalIntersectingRejected() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g1", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        Zone g2 = Zone.cuboid(2, "g2", ZoneType.GLOBAL, W, null, 50, 0, 0, 150, 100, 100); // 与 g1 相交
         assertThat(ZoneHierarchy.canCreate(g2, null, tree).valid()).isFalse();
+    }
+
+    @Test
+    void globalInOtherWorldAllowed() {
+        ZoneTree tree = new ZoneTree();
+        tree.add(Zone.cuboid(1, "g1", ZoneType.GLOBAL, W, null, 0, 0, 0, 100, 100, 100));
+        UUID w2 = UUID.randomUUID();
+        Zone g2 = Zone.cuboid(2, "g2", ZoneType.GLOBAL, w2, null, 0, 0, 0, 100, 100, 100);
+        assertThat(ZoneHierarchy.canCreate(g2, null, tree).valid()).isTrue();
     }
 
     @Test
