@@ -70,7 +70,7 @@ list:
 
 actionbar:
   # 游玩中：当前用时 + 星级 / 最佳用时
-  playing: "&b{current} &r{stars}\n&7best: &a{best}"
+  playing: "&b{current} &r{stars} &7best: &a{best}"
   # 触发存档点后持续提示直到离开
   checkpoint: "&a✔ 存档点已记录"
   # 进入起点时
@@ -117,7 +117,7 @@ menu:
 parkour:
   marked: "&a你已进入跑酷区域。"
   unmarked: "&7你已离开跑酷区域。"
-  teleported-lobby: "&e已返回大厅（跳关/防挂机）。"
+  teleported-lobby: "&e已返回大厅。"
   teleported-checkpoint: "&e已回到上一个存档点。"
   teleported-start: "&e已重玩本关。"
   idle-invalidated: "&c长时间未活动，成绩作废。"
