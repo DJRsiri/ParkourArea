@@ -36,14 +36,24 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
+val javaToolchainService = extensions.getByType<JavaToolchainService>()
+
 tasks {
     runServer {
         minecraftVersion("1.21.11")
         jvmArgs("-Xms2G", "-Xmx2G")
+        // 本地调试服务端用 Java 25 启动：ProtocolLib 5.5.x dev 构建按 Java 25 编译（class 69），
+        // 默认 toolchain 21 会 UnsupportedClassVersionError；仅影响本地 runServer，不影响产物
+        javaLauncher.set(javaToolchainService.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(25))
+        })
     }
 
     processResources {
         val props = mapOf("version" to version, "description" to project.description)
+        // 把 expand 的属性声明为任务输入：version 变化时 processResources 不再被误判 UP-TO-DATE，
+        // 否则 jar 内 plugin.yml 会停留在旧版本号
+        inputs.properties(props.mapValues { it.value.toString() })
         filesMatching("plugin.yml") {
             expand(props)
         }

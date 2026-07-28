@@ -13,7 +13,7 @@ public final class ProtocolLibPresent implements VisibilityHook {
 
     public ProtocolLibPresent(Plugin plugin) {
         this.plugin = plugin;
-        this.scalingSupported = ScalePackets.probe();
+        this.scalingSupported = ScalePackets.probe(plugin.getLogger());
     }
 
     @Override
