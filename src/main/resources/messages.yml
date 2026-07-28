@@ -117,6 +117,8 @@ menu:
 parkour:
   marked: "&a你已进入跑酷区域。"
   unmarked: "&7你已离开跑酷区域。"
+  unmarked-gamemode: "&7你已退出跑酷状态（游戏模式不符合要求）。"
+  unmarked-editmode: "&7你已退出跑酷状态（已进入编辑模式）。"
   teleported-lobby: "&e已返回大厅。"
   teleported-checkpoint: "&e已回到上一个存档点。"
   teleported-start: "&e已重玩本关。"

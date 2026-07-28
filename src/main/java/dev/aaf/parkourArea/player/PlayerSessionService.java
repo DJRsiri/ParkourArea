@@ -59,7 +59,7 @@ public final class PlayerSessionService {
         if (inGlobal && session == null) {
             tryMark(player);
         } else if (!inGlobal && session != null) {
-            unmark(player);
+            unmark(player, UnmarkReason.LEFT_ZONE);
         } else if (session != null && e.to() != null) {
             session.currentZone(e.to());
         }
@@ -131,13 +131,18 @@ public final class PlayerSessionService {
         }
     }
 
-    public void unmark(Player player) {
+    public void unmark(Player player, UnmarkReason reason) {
         ParkourPlayer session = sessions.remove(player.getUniqueId());
         if (session == null) {
             return;
         }
         if (session.savedState() != null) {
-            session.savedState().restore(player);
+            try {
+                session.savedState().restore(player);
+            } catch (Exception e) {
+                // restore 失败不阻塞会话移除，避免玩家卡死在跑酷状态
+                plugin.getLogger().warning("恢复玩家状态失败: " + e.getMessage());
+            }
         }
         if (plugin.progressService() != null) {
             plugin.progressService().remove(player.getUniqueId());
@@ -148,8 +153,33 @@ public final class PlayerSessionService {
         if (plugin.blockCommandService() != null) {
             plugin.blockCommandService().clear(player.getUniqueId());
         }
-        plugin.messages().send(player, "parkour.unmarked");
+        String path = switch (reason) {
+            case LEFT_ZONE -> "parkour.unmarked";
+            case GAMEMODE -> "parkour.unmarked-gamemode";
+            case EDIT_MODE -> "parkour.unmarked-editmode";
+        };
+        plugin.messages().send(player, path);
         eventBus.publish(new ParkourUnmarkedEvent(player.getUniqueId()));
+    }
+
+    /**
+     * 每 tick 前提条件对账（由 PlayerRegionTracker 调用）：
+     * 已标记但条件失效（编辑模式或游戏模式不合规）→ 取消标记；
+     * 未标记但处于 GLOBAL 内且条件满足 → 补标记。
+     */
+    public void reconcile(Player player, Zone currentZone) {
+        ParkourPlayer session = sessions.get(player.getUniqueId());
+        boolean editMode = plugin.editModeService().isEditMode(player);
+        boolean modeOk = plugin.configService().settings().requiresGameMode(player.getGameMode());
+        if (session != null) {
+            if (editMode) {
+                unmark(player, UnmarkReason.EDIT_MODE);
+            } else if (!modeOk) {
+                unmark(player, UnmarkReason.GAMEMODE);
+            }
+        } else if (modeOk && !editMode && isInGlobal(currentZone)) {
+            tryMark(player);
+        }
     }
 
     /** 每 tick 更新玩家位置/视角快照（防挂机用）。 */

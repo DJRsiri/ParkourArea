@@ -63,6 +63,8 @@ public final class PlayerRegionTracker {
                 lastZones.put(uid, to);
                 eventBus.publish(new PlayerZoneChangeEvent(uid, from, to));
             }
+            // 前提条件对账：游戏模式/编辑模式变化即时生效（含未标记玩家的补标记）
+            sessionService.reconcile(player, to);
             // 更新防挂机位置快照 + 发布跑酷 tick 事件（仅对已标记的跑酷玩家）
             ParkourPlayer session = sessionService.get(uid);
             if (session != null) {
