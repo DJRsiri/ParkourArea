@@ -53,7 +53,8 @@ tasks {
         val props = mapOf("version" to version, "description" to project.description)
         // 把 expand 的属性声明为任务输入：version 变化时 processResources 不再被误判 UP-TO-DATE，
         // 否则 jar 内 plugin.yml 会停留在旧版本号
-        inputs.properties(props.mapValues { it.value.toString() })
+        // description 在 gradle.properties 恒有值；过滤 null 防御未来改动导致 NPE
+        inputs.properties(props.filterValues { it != null }.mapValues { it.value!!.toString() })
         filesMatching("plugin.yml") {
             expand(props)
         }

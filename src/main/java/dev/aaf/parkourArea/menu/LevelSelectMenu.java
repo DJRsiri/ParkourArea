@@ -216,8 +216,7 @@ public final class LevelSelectMenu extends ParkourMenu {
         Zone level = selectableSlots.get(slot);
         if (level == null) {
             if (levelSlots.containsKey(slot)) {
-                plugin.messages().send(viewer, "command.invalid-hierarchy",
-                        Map.of("reason", "该关卡未解锁"));
+                plugin.messages().send(viewer, "menu.level-locked");
             }
             return;
         }

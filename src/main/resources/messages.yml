@@ -5,7 +5,7 @@
 # 变量用 {xxx} 占位
 
 # 配置文件版本（请勿手改）：见 config.yml 的 config-version 说明
-messages-version: 3
+messages-version: 4
 
 prefix: "&8[&bParkour&8] &r"
 
@@ -92,6 +92,7 @@ menu:
   lore-status-grey: "&7未解锁"
   lore-status-yellow: "&e可挑战"
   lore-status-green: "&a已通关"
+  level-locked: "&c该关卡未解锁"
   lb-prev: "&a◀ 上一页"
   lb-next: "&a下一页 ▶"
   lb-global-switch: "&b区域: {name}"

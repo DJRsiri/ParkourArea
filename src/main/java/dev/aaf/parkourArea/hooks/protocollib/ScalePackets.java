@@ -30,14 +30,14 @@ final class ScalePackets {
 
     private static final String MODIFIER_ID = "parkourarea:scale";
 
-    private static Method bukkitToMinecraftHolder;
-    private static Method identifierParse;
-    private static Constructor<?> modifierCtor;
-    private static Constructor<?> instanceCtor;
-    private static Method setBaseValue;
-    private static Method addTransientModifier;
-    private static Constructor<?> packetCtor;
-    private static Object operationAddValue;
+    private static volatile Method bukkitToMinecraftHolder;
+    private static volatile Method identifierParse;
+    private static volatile Constructor<?> modifierCtor;
+    private static volatile Constructor<?> instanceCtor;
+    private static volatile Method setBaseValue;
+    private static volatile Method addTransientModifier;
+    private static volatile Constructor<?> packetCtor;
+    private static volatile Object operationAddValue;
 
     private ScalePackets() {}
 
